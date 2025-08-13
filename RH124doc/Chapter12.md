@@ -88,6 +88,29 @@ This notebook provides a detailed summary of Chapter 12 from the Red Hat System 
   sudo firewall-cmd --reload  # Apply firewall changes
   ```
 
+  Got it! You want to create a note. Since you mentioned adding a new network connection with `nmcli` earlier, I’ll assume you want a quick note related to that task, but feel free to clarify if you meant something else. Here’s a concise note summarizing the `nmcli` process for adding a network connection in Linux:
+
+---
+
+- **Note: Adding a Network Connection with nmcli**
+
+- **Purpose**: Add a new network connection (e.g., Ethernet, Wi-Fi) using `nmcli`.  
+- **Basic Command**:
+
+  ```bash
+  nmcli con add type <type> ifname <interface> con-name <name> [options]
+  ```  
+
+- **Examples**:  
+  - Ethernet (DHCP): `nmcli con add type ethernet ifname enp0s3 con-name my-ethernet`  
+  - Ethernet (Static IP): `nmcli con add type ethernet ifname enp0s3 con-name my-ethernet ipv4.method manual ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8`  
+  - Wi-Fi: `nmcli con add type wifi ifname wlan0 con-name my-wifi ssid MyWiFi wifi-sec.key-mgmt wpa-psk wifi-sec.psk MyPassword`  
+- **Activate**: `nmcli con up <con-name>`  
+- **Verify**: `nmcli con show` or `nmcli device status`  
+- **Tip**: Check interface names with `ip link show`.  
+
+---
+
 ### Practical Examples
 
 - **Scenario: Configure Static IP**:
