@@ -12,24 +12,25 @@ Linux uses three standard streams for input and output:
 - **Standard Output (stdout, file descriptor 1)**: The default destination for normal program output, typically displayed on the terminal.
 - **Standard Error (stderr, file descriptor 2)**: The default destination for error messages, also typically displayed on the terminal.
 
-### Redirection Operators
+### Redirection Operators Table
 
-Redirection allows you to send these streams to files or other programs instead of their default destinations. The key operators are:
+The following table summarizes the key redirection operators used in Linux to manage standard output (stdout) and standard error (stderr) streams, redirecting them to files or other destinations.
 
-- **`>`**: Redirects stdout to a file, overwriting the file if it exists.
-  - Example: `ls -l > output.txt` writes the directory listing to `output.txt`, replacing its contents.
-- **`>>`**: Redirects stdout to a file, appending instead of overwriting.
-  - Example: `ls -l >> output.txt` adds the directory listing to the end of `output.txt`.
-- **`2>`**: Redirects stderr to a file, overwriting it.
-  - Example: `ls /badpath 2> error.log` writes the error message to `error.log`.
-- **`2>/dev/null`**: Discards stderr by redirecting it to `/dev/null`, a special file that discards all data.
-  - Example: `ls /badpath 2>/dev/null` suppresses error messages.
-- **`>file 2>&1`**: Redirects both stdout and stderr to the same file. The order is critical: stdout is redirected first, then stderr is redirected to the same destination as stdout.
-  - Example: `ls -l /badpath > output.txt 2>&1` writes both output and errors to `output.txt`.
-- **`&>file`**: A shorthand for redirecting both stdout and stderr to a file (equivalent to `>file 2>&1`).
-  - Example: `ls -l /badpath &> output.txt`.
-- **`&>>file`**: Appends both stdout and stderr to a file.
-  - Example: `ls -l /badpath &>> output.txt`.
+| Operator          | Description                                                                 | Effect on File                     | Example                                      |
+|-------------------|-----------------------------------------------------------------------------|------------------------------------|----------------------------------------------|
+| `>`               | Redirects stdout to a file, overwriting the file if it exists.               | Overwrites file                    | `ls -l > output.txt`                         |
+| `>>`              | Redirects stdout to a file, appending instead of overwriting.                | Appends to file                    | `ls -l >> output.txt`                        |
+| `2>`              | Redirects stderr to a file, overwriting it.                                  | Overwrites file                    | `ls /badpath 2> error.log`                   |
+| `2>/dev/null`     | Discards stderr by redirecting it to `/dev/null`.                           | Discards data                      | `ls /badpath 2>/dev/null`                    |
+| `>file 2>&1`      | Redirects both stdout and stderr to the same file (order matters).           | Overwrites file                    | `ls -l /badpath > output.txt 2>&1`           |
+| `&>file`          | Shorthand for redirecting both stdout and stderr to a file.                  | Overwrites file                    | `ls -l /badpath &> output.txt`               |
+| `&>>file`         | Appends both stdout and stderr to a file.                                    | Appends to file                    | `ls -l /badpath &>> output.txt`              |
+
+**Notes**:
+
+- `/dev/null` is a special file that discards all data written to it, commonly used to suppress output.
+- The `>file 2>&1` syntax ensures stdout is redirected first, then stderr is sent to the same destination as stdout.
+- The `&>file` and `&>>file` are Bash-specific shorthands and may not work in all shells.
 
 ### Example of Output Redirection
 
@@ -108,76 +109,71 @@ In the above example, `log_files.txt` contains the full output of `ls -l /var/lo
 
 ---
 
-## 4. Editing Text Using Vim
+## 4. Vim Cheatsheet
 
-**Vim** is a highly configurable, lightweight text editor commonly used in Linux environments. It’s powerful but has a learning curve due to its modal interface.
+This cheatsheet provides a concise overview of Vim’s operating modes, basic workflow, and common commands for text editing in Linux.
 
 ### Vim Operating Modes
 
-Vim operates in several modes, each serving a specific purpose:
+| Mode              | Purpose                                  | How to Enter                              | How to Exit            |
+|-------------------|------------------------------------------|------------------------------------------|------------------------|
+| **Normal Mode**   | Navigation and issuing commands          | Default mode, or `Esc` from other modes  | N/A                    |
+| **Insert Mode**   | Typing or editing text                   | `i` (insert), `a` (append), `o` (new line below) | `Esc`                |
+| **Command-Line Mode** | Executing commands (e.g., save, quit) | `:` in Normal Mode                       | `Enter` or `Esc`       |
+| **Visual Mode**   | Selecting text for operations            | `v` (character-wise), `V` (line-wise), `Ctrl+v` (block-wise) | `Esc`            |
 
-1. **Normal Mode** (default):
-   - Used for navigation and issuing commands.
-   - Examples: `h` (left), `j` (down), `k` (up), `l` (right), `dd` (delete line), `yy` (copy line).
-   - Enter commands by typing `:` (e.g., `:w` to save, `:q` to quit).
-2. **Insert Mode**:
-   - Used for typing or editing text.
-   - Enter from Normal Mode with keys like `i` (insert at cursor), `a` (append after cursor), `o` (new line below).
-   - Exit to Normal Mode with `Esc`.
-3. **Command-Line Mode**:
-   - Used for executing complex commands, such as saving, quitting, or searching.
-   - Enter by typing `:` in Normal Mode.
-   - Examples: `:w` (save), `:q` (quit), `:wq` (save and quit), `:q!` (quit without saving).
-4. **Visual Mode**:
-   - Used for selecting text for operations like copying, cutting, or deleting.
-   - Enter with:
-     - `v`: Character-wise selection.
-     - `V`: Line-wise selection.
-     - `Ctrl+v`: Block-wise selection (useful for columnar editing).
-   - Operations: `y` (yank/copy), `d` (delete), `p` (paste).
+### Minimum Vim Workflow
 
-### Minimum and Basic Vim Workflow
+| Step              | Action                                   | Command                                  |
+|-------------------|------------------------------------------|------------------------------------------|
+| Open a file       | Start editing a file                     | `vim filename`                           |
+| Edit text         | Enter Insert Mode to type                | `i` (or `a`, `o`)                        |
+| Save changes      | Write changes to file                    | `:w` (in Normal Mode)                    |
+| Quit              | Exit Vim                                 | `:q` (in Normal Mode)                    |
+| Save and quit     | Save changes and exit                    | `:wq` or `ZZ` (in Normal Mode)           |
+| Quit without saving | Discard changes and exit                | `:q!` (in Normal Mode)                   |
 
-1. **Open a file**: `vim filename`
-2. **Edit**:
-   - Enter Insert Mode: Press `i` to start typing.
-   - Make changes to the text.
-3. **Save and exit**:
-   - Return to Normal Mode: Press `Esc`.
-   - Save: Type `:w` and press `Enter`.
-   - Quit: Type `:q` and press `Enter`.
-   - Save and quit: Type `:wq` or `ZZ` (in Normal Mode).
-4. **Quit without saving**:
-   - Type `:q!` to discard changes and exit.
+### Visual Mode Operations
 
-### Visual Mode in Vim
+| Action            | Command                                  | Description                              |
+|-------------------|------------------------------------------|------------------------------------------|
+| Start selection   | `v`                                      | Character-wise selection                 |
+|                   | `V`                                      | Line-wise selection                      |
+|                   | `Ctrl+v`                                 | Block-wise selection (columnar editing)   |
+| Copy (yank)       | `y`                                      | Copy selected text                       |
+| Cut (delete)      | `d`                                      | Delete selected text                     |
+| Paste             | `p`                                      | Paste after cursor                       |
 
-- **Purpose**: Select text for operations like copying, cutting, or formatting.
-- **Usage**:
-  - Enter Visual Mode: Press `v` (character-wise), `V` (line-wise), or `Ctrl+v` (block-wise).
-  - Move the cursor to select text.
-  - Perform an action:
-    - `y`: Copy (yank) the selected text.
-    - `d`: Delete (cut) the selected text.
-    - `p`: Paste after the cursor.
-  - Example:
-
-    ```vim
-    # In Normal Mode
-    v           # Start character-wise selection
-    <move>      # Move cursor to select text
-    y           # Copy the selection
-    p           # Paste the copied text
-    ```
+**Example**: In Normal Mode, press `v`, move cursor to select text, press `y` to copy, then `p` to paste.
 
 ### Common Vim Commands
 
-- Navigation: `h` (left), `j` (down), `k` (up), `l` (right), `w` (next word), `b` (previous word).
-- Editing: `dd` (delete line), `yy` (copy line), `p` (paste), `u` (undo), `Ctrl+r` (redo).
-- Search: `/pattern` (search forward), `?pattern` (search backward), `n` (next match), `N` (previous match).
-- Replace: `:%s/old/new/g` (replace all occurrences of "old" with "new").
+| Category          | Command                                  | Description                              |
+|-------------------|------------------------------------------|------------------------------------------|
+| **Navigation**    | `h`, `j`, `k`, `l`                       | Move left, down, up, right               |
+|                   | `w`                                      | Move to next word                        |
+|                   | `b`                                      | Move to previous word                    |
+| **Editing**       | `dd`                                     | Delete current line                      |
+|                   | `yy`                                     | Copy current line                        |
+|                   | `p`                                      | Paste after cursor                       |
+|                   | `u`                                      | Undo last change                         |
+|                   | `Ctrl+r`                                 | Redo undone change                       |
+| **Search**        | `/pattern`                               | Search forward for pattern               |
+|                   | `?pattern`                               | Search backward for pattern              |
+|                   | `n`                                      | Next match                               |
+|                   | `N`                                      | Previous match                           |
+| **Replace**       | `:%s/old/new/g`                          | Replace all occurrences of "old" with "new" |
+| **Save/Quit**     | `:w`                                     | Save file                                |
+|                   | `:q`                                     | Quit Vim                                 |
+|                   | `:wq` or `ZZ`                            | Save and quit                            |
+|                   | `:q!`                                    | Quit without saving                      |
 
----
+**Notes**:
+
+- Vim is modal, so always check your mode before typing.
+- Use `Esc` to return to Normal Mode from Insert or Visual Mode.
+- Save frequently with `:w` to avoid losing changes.
+- Practice commands in a test file to build familiarity.
 
 ## 5. Changing the Shell Environment
 
