@@ -265,9 +265,3 @@ This enhanced notebook provides a comprehensive and well-organized summary of Ch
     # Add: testuser ALL=(ALL) /usr/bin/systemctl
     id testuser
     ```
-
-- **Self-Test**:
-  - Explain the `/etc/shadow` fields and their purpose.
-  - Create a group `admins`, add two users, and grant `sudo` access to one command.
-  - Lock a user account and verify the change in `/etc/shadow`.
-  

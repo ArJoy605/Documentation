@@ -186,8 +186,4 @@ This notebook provides a detailed summary of Chapter 7 from the Red Hat System A
     ls -ld /data; getfacl /data
     ```
 
-- **Self-Test**:
-  - Explain the output of `ls -l` for `-rwxr-xr-t` (owner: rwx, group: rx, others: rx, sticky bit set).
-  - Why use `chown -R`? (Applies ownership changes to directory and all contents.)
-
 ---

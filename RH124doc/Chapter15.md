@@ -1,205 +1,690 @@
 # RH124 Revision Notebook: Chapter 15 - Access Linux File Systems
 
-This notebook provides a detailed summary of Chapter 15 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on accessing and managing Linux file systems, including mounting, unmounting, and understanding file system types, with comprehensive explanations, commands, practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
+This notebook summarizes Chapter 15 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on identifying, mounting, unmounting, and managing Linux file systems, as well as searching for files using `find` and `locate`, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
 
-## Chapter 15: Access Linux File Systems
+## Chapter 15: Accessing Linux File Systems
 
 ### Key Concepts
 
-- **File Systems in Linux**:
-  - A file system organizes and stores data on storage devices (e.g., disks, SSDs).
-  - Common types in RHEL: **XFS** (default), **ext4** (legacy), **vfat** (USB drives), **nfs** (network), **tmpfs** (memory-based).
-  - Each file system is mounted to a directory (e.g., `/mnt`) to make it accessible.
+- **File Systems**:
+  - Organize and store data on storage devices (e.g., disks, SSDs).
+  - Common types in RHEL: **XFS** (default, scalable), **ext4** (legacy), **vfat** (USB drives), **nfs** (network), **tmpfs** (memory-based).
 - **Mounting**:
-  - **Mount**: Attaches a file system to a directory in the file system hierarchy.
-  - **Unmount**: Detaches a file system, making it inaccessible.
-  - Mount points are typically `/mnt`, `/media`, or custom directories.
-- **Key Files and Directories**:
-  - `/etc/fstab`: Defines permanent mount points and file system options.
-    - Format: `device mount_point filesystem_type options dump pass`.
-  - `/proc/mounts` or `/etc/mtab`: Lists currently mounted file systems.
-  - `/dev/`: Contains device files (e.g., `/dev/sda1` for a disk partition).
-- **Device Identification**:
-  - Devices are identified by name (e.g., `/dev/sda1`), UUID, or label.
-  - UUIDs are unique identifiers for file systems, preferred for consistency.
-- **Tools for File System Management**:
-  - `mount`, `umount`: Manual mounting and unmounting.
-  - `lsblk`, `blkid`: List block devices and their details.
-  - `df`, `du`: Monitor disk usage.
+  - Attaches a file system to a directory (mount point, e.g., `/mnt`, `/media`) for access.
+  - Unmounting detaches it, making it inaccessible.
+- **Storage Management**:
+  - Devices: Represented as block devices (e.g., `/dev/sda1`).
+  - Partitions: Subdivisions of disks (e.g., `/dev/sda1`, `/dev/sda2`).
+  - Logical Volumes: Managed by LVM for flexible storage.
+- **Key Files**:
+  - `/etc/fstab`: Defines permanent mounts (format: `device mount_point filesystem_type options dump pass`).
+  - `/proc/mounts`: Lists active mounts.
+  - `/dev/`: Contains device files.
+- **File Searching**:
+  - `find`: Searches file system in real-time based on criteria (e.g., name, size, permissions).
+  - `locate`: Uses a prebuilt database for faster searches.
 - **RHEL 9/10 Notes**:
-  - XFS is optimized for large files and scalability in RHEL 9/10.
-  - RHEL 10 enhances `systemd` integration for automounting and Lightspeed support for file system tasks (e.g., `rhel lightspeed "mount a USB drive"` suggests `mount` commands).
+  - XFS is optimized for large files and high performance.
+  - RHEL 10 enhances `systemd` automounting and Lightspeed support (e.g., `rhel lightspeed "mount USB drive"` suggests `mount /dev/sdb1 /mnt`).
 
-### Important Commands
+### Identifying File Systems and Devices
 
-- **Listing File Systems and Devices**:
+- **Purpose**: Determine storage devices, file system types, and their properties.
+- **Commands**:
+  - `lsblk`: List block devices and mount points.
+  - `blkid`: Show UUIDs and file system types.
+  - `fdisk -l` (requires `sudo`): List disk partitions.
+- **Examples**:
+  1. List devices:
+
+     ```bash
+     lsblk
+     ```
+
+     Output: Shows `/dev/sda1` (root, XFS), `/dev/sdb1` (vfat), etc.
+  2. Get UUIDs:
+
+     ```bash
+     blkid
+     ```
+
+     Output: `UUID="1234-ABCD" TYPE="ext4"`.
+  3. Corner Case: Device not listed:
+
+     ```bash
+     lsblk
+     # No USB device
+     # Fix: Rescan: sudo echo "- - -" > /sys/class/scsi_host/hostX/scan
+     ```
+
+### Storage Management Concepts
+
+- **Block Devices**: Represent storage (e.g., `/dev/sda`, `/dev/nvme0n1`).
+- **Disk Partitions**: Subdivide disks (e.g., `/dev/sda1` for boot, `/dev/sda2` for root).
+- **Logical Volumes**: Managed by Logical Volume Manager (LVM) for dynamic resizing.
+- **File Systems**: Structure data (e.g., XFS, ext4).
+- **Example**:
+  - Check LVM setup:
+
+    ```bash
+    lvs  # List logical volumes
+    vgs  # List volume groups
+    pvs  # List physical volumes
+    ```
+
+### File Systems and Mount Points
+
+- **Mount Points**: Directories where file systems are attached (e.g., `/mnt`, `/media/username`).
+- **Common File Systems**:
+  - XFS: Default, high-performance.
+  - ext4: Reliable, widely used.
+  - vfat: Compatible with Windows (USB drives).
+  - nfs: Network file system.
+- **Example**:
+  - List mounts:
+
+    ```bash
+    mount | grep /dev
+    ```
+
+### File Systems, Storage, Block Devices
+
+- **Block Devices**: Physical or virtual storage (e.g., `/dev/sda`, `/dev/nvme0n1`).
+- **Commands**:
+  - `lsblk -f`: Show file systems and UUIDs.
+  - `parted -l`: List partition details (requires `sudo`).
+- **Examples**:
+  1. List block devices with file systems:
+
+     ```bash
+     lsblk -f
+     ```
+
+  2. Check partition table:
+
+     ```bash
+     sudo parted -l
+     ```
+
+  3. Corner Case: Unformatted device:
+
+     ```bash
+     blkid /dev/sdb1
+     # No output
+     # Fix: Format: sudo mkfs.xfs /dev/sdb1
+     ```
+
+### Disk Partitions
+
+- **Purpose**: Divide disks for separate file systems (e.g., `/boot`, `/home`).
+- **Tools**: `fdisk`, `parted`, `gparted` (GUI, not in RH124).
+- **Examples**:
+  1. List partitions:
+
+     ```bash
+     sudo fdisk -l /dev/sda
+     ```
+
+  2. Create partition (interactive):
+
+     ```bash
+     sudo fdisk /dev/sdb
+     # Commands: n (new), p (primary), w (write)
+     ```
+
+  3. Corner Case: Partition table locked:
+
+     ```bash
+     sudo fdisk /dev/sdb
+     # Error: Device busy
+     # Fix: Unmount: sudo umount /dev/sdb1
+     ```
+
+### Logical Volumes
+
+- **Purpose**: LVM allows dynamic resizing and pooling of storage.
+- **Components**:
+  - Physical Volumes (PV): Disks/partitions (e.g., `/dev/sda1`).
+  - Volume Groups (VG): Pool of PVs.
+  - Logical Volumes (LV): Virtual partitions in a VG.
+- **Examples**:
+  1. Create logical volume:
+
+     ```bash
+     sudo pvcreate /dev/sdb1
+     sudo vgcreate myvg /dev/sdb1
+     sudo lvcreate -L 10G -n mylv myvg
+     sudo mkfs.xfs /dev/myvg/mylv
+     ```
+
+  2. Mount LV:
+
+     ```bash
+     sudo mkdir /mnt/mylv
+     sudo mount /dev/myvg/mylv /mnt/mylv
+     ```
+
+  3. Corner Case: No space in VG:
+
+     ```bash
+     lvcreate -L 20G myvg
+     # Error: Insufficient space
+     # Fix: Add PV: pvcreate /dev/sdb2; vgextend myvg /dev/sdb2
+     ```
+
+### Examining File Systems
+
+- **Commands**:
+  - `fsck`: Check and repair file systems.
+  - `df -h`: Disk usage.
+  - `du -sh`: Directory size.
+- **Examples**:
+  1. Check file system:
+
+     ```bash
+     sudo fsck /dev/sdb1
+     ```
+
+  2. Disk usage:
+
+     ```bash
+     df -h /mnt
+     ```
+
+  3. Corner Case: File system errors:
+
+     ```bash
+     fsck /dev/sdb1
+     # Errors found
+     # Fix: sudo fsck -y /dev/sdb1
+     ```
+
+### Mounting and Unmounting File Systems
+
+- **Mounting**: Attaches file system to a directory.
+- **Unmounting**: Detaches file system, ensuring no open files.
+- **Examples**:
+  1. Mount USB:
+
+     ```bash
+     sudo mkdir /mnt/usb
+     sudo mount /dev/sdb1 /mnt/usb
+     ```
+
+  2. Unmount:
+
+     ```bash
+     sudo umount /mnt/usb
+     ```
+
+  3. Corner Case: Device busy:
+
+     ```bash
+     umount /mnt/usb
+     # Error: Device busy
+     # Fix: lsof /mnt/usb; sudo fuser -k /mnt/usb
+     ```
+
+### Mounting File Systems Manually
+
+- **Command**: `mount [device] [mount_point]`.
+- **Examples**:
+  1. Mount ext4 partition:
+
+     ```bash
+     sudo mount -t ext4 /dev/sdc1 /mnt/data
+     ```
+
+  2. Mount read-only:
+
+     ```bash
+     sudo mount -o ro /dev/sdb1 /mnt/readonly
+     ```
+
+  3. Corner Case: Wrong file system type:
+
+     ```bash
+     mount -t ext4 /dev/sdb1 /mnt
+     # Error: Wrong fs type
+     # Fix: blkid /dev/sdb1; mount -t vfat
+     ```
+
+### Identifying Block Devices
+
+- **Commands**: `lsblk`, `blkid`, `fdisk -l`.
+- **Examples**:
+  1. List block devices:
+
+     ```bash
+     lsblk
+     ```
+
+  2. Get UUID:
+
+     ```bash
+     blkid /dev/sdb1
+     ```
+
+  3. Corner Case: Device not detected:
+
+     ```bash
+     lsblk
+     # Missing device
+     # Fix: Rescan: sudo echo "- - -" > /sys/class/scsi_host/hostX/scan
+     ```
+
+### Mounting by Block Device Name
+
+- **Syntax**: `mount /dev/<device> /mount_point`.
+- **Examples**:
+  1. Mount by device:
+
+     ```bash
+     sudo mount /dev/sdb1 /mnt/data
+     ```
+
+  2. Verify:
+
+     ```bash
+     mount | grep /mnt/data
+     ```
+
+  3. Corner Case: Device name changed:
+
+     ```bash
+     mount /dev/sdb1 /mnt
+     # Error: No such device
+     # Fix: Use UUID in fstab
+     ```
+
+### Mounting by File System UUID
+
+- **Purpose**: UUIDs ensure consistent mounting despite device name changes.
+- **Examples**:
+  1. Get UUID:
+
+     ```bash
+     blkid /dev/sdb1
+     ```
+
+     Output: `UUID="1234-ABCD"`.
+  2. Add to `fstab`:
+
+     ```bash
+     sudo vim /etc/fstab
+     # Add: UUID=1234-ABCD /mnt/data xfs defaults 0 0
+     ```
+
+  3. Mount:
+
+     ```bash
+     sudo mount -a
+     ```
+
+  4. Corner Case: Invalid UUID:
+
+     ```bash
+     mount -a
+     # Error: UUID not found
+     # Fix: Verify: blkid
+     ```
+
+### Automatic Mounting of Removable Storage Devices
+
+- **Tool**: `systemd` and `udisks2` handle automounting (e.g., USB drives in `/media/username`).
+- **Examples**:
+  1. Check automount:
+
+     ```bash
+     mount | grep /media
+     ```
+
+  2. Disable automount (not typical in RH124):
+
+     ```bash
+     sudo systemctl stop udisks2
+     ```
+
+  3. Corner Case: Automount fails:
+
+     ```bash
+     journalctl -u udisks2
+     # Fix: Ensure udisks2: systemctl start udisks2
+     ```
+
+### Unmounting File Systems
+
+- **Command**: `umount [device|mount_point]`.
+- **Examples**:
+  1. Unmount by mount point:
+
+     ```bash
+     sudo umount /mnt/data
+     ```
+
+  2. Unmount by device:
+
+     ```bash
+     sudo umount /dev/sdb1
+     ```
+
+  3. Corner Case: Files in use:
+
+     ```bash
+     umount /mnt/data
+     # Error: Target busy
+     # Fix: lsof /mnt/data; sudo fuser -k /mnt/data
+     ```
+
+### Locating Files on the System
+
+- **Tools**:
+  - `find`: Real-time search based on criteria.
+  - `locate`: Fast, database-driven search (requires `mlocate`).
+- **Setup for `locate`**:
 
   ```bash
-  lsblk  # List block devices and mount points
-  blkid  # Show device UUIDs and file system types
-  df -h  # Show disk usage in human-readable format
-  du -sh /path  # Show directory size
-  cat /proc/mounts  # List active mounts
+  sudo dnf install mlocate
+  sudo updatedb  # Update locate database
   ```
 
-- **Mounting File Systems**:
+### Searching for Files with `find`
 
-  ```bash
-  mount /dev/sdb1 /mnt  # Mount device to /mnt
-  mount -t ext4 /dev/sdb1 /mnt  # Specify file system type
-  mount -o ro /dev/sdb1 /mnt  # Mount read-only
-  mount  # List all mounted file systems
-  ```
+- **Syntax**: `find [path] [criteria]`.
+- **Examples**:
+  1. Find file by name:
 
-- **Unmounting File Systems**:
+     ```bash
+     find /home -name "config.txt"
+     ```
 
-  ```bash
-  umount /mnt  # Unmount file system
-  umount /dev/sdb1  # Unmount by device
-  ```
+  2. Find directories:
 
-- **Managing `/etc/fstab`**:
+     ```bash
+     find /var -type d -name "log"
+     ```
 
-  ```bash
-  cat /etc/fstab  # View mount configurations
-  sudo vim /etc/fstab  # Edit fstab (e.g., add UUID-based mount)
-  ```
+  3. Corner Case: Permission denied:
 
-- **Finding Device Information**:
+     ```bash
+     find /root
+     # Error: Permission denied
+     # Fix: sudo find /root -name file
+     ```
 
-  ```bash
-  blkid /dev/sdb1  # Get UUID and file system type
-  lsblk -f  # Show file system details with UUIDs
-  ```
+### Searching for Files with `locate`
 
-- **Checking Disk Usage**:
+- **Command**: `locate [pattern]`.
+- **Examples**:
+  1. Find file:
 
-  ```bash
-  df -h /  # Check free space on root
-  du -sh /home/user1  # Check size of user1’s home
-  ```
+     ```bash
+     locate config.txt
+     ```
+
+  2. Update database:
+
+     ```bash
+     sudo updatedb
+     ```
+
+  3. Corner Case: Outdated database:
+
+     ```bash
+     locate newfile.txt
+     # No results
+     # Fix: sudo updatedb
+     ```
+
+### Searching for Files in Real Time
+
+- **Tool**: `find` (real-time, no database needed).
+- **Examples**:
+  1. Find recent files:
+
+     ```bash
+     find /home -mmin -60  # Modified in last hour
+     ```
+
+  2. Find empty files:
+
+     ```bash
+     find /tmp -empty
+     ```
+
+  3. Corner Case: Slow search:
+
+     ```bash
+     find /
+     # Slow on large systems
+     # Fix: Narrow path: find /home
+     ```
+
+### Searching Files Based on Ownership or Permission
+
+- **Examples**:
+  1. Find files owned by `user1`:
+
+     ```bash
+     find /home -user user1
+     ```
+
+  2. Find files with 777 permissions:
+
+     ```bash
+     find / -perm 777
+     ```
+
+  3. Corner Case: Permission errors:
+
+     ```bash
+     find / -perm 600
+     # Errors: Permission denied
+     # Fix: sudo find / -perm 600
+     ```
+
+### Searching Files Based on Size
+
+- **Examples**:
+  1. Find files larger than 100MB:
+
+     ```bash
+     find / -size +100M
+     ```
+
+  2. Find files smaller than 1MB:
+
+     ```bash
+     find /home -size -1M
+     ```
+
+  3. Corner Case: No results:
+
+     ```bash
+     find /tmp -size +1G
+     # Fix: Verify size: find /tmp -size +100k
+     ```
+
+### Searching Files Based on File Type
+
+- **Types**: `f` (file), `d` (directory), `l` (symlink).
+- **Examples**:
+  1. Find regular files:
+
+     ```bash
+     find /home -type f -name "*.txt"
+     ```
+
+  2. Find directories:
+
+     ```bash
+     find /var -type d
+     ```
+
+  3. Corner Case: Wrong type:
+
+     ```bash
+     find / -type f -name log
+     # Fix: find / -type d -name log
+     ```
+
+### Searching Files Based on Modification Time and Birth Time
+
+- **Options**:
+  - `-mtime <days>`: Modified days ago.
+  - `-mmin <minutes>`: Modified minutes ago.
+  - `-ctime`: Creation time (not always available).
+- **Examples**:
+  1. Files modified in last 24 hours:
+
+     ```bash
+     find /home -mtime -1
+     ```
+
+  2. Files modified in last 30 minutes:
+
+     ```bash
+     find /tmp -mmin -30
+     ```
+
+  3. Corner Case: No creation time:
+
+     ```bash
+     find / -ctime -1
+     # Fix: Use -mtime or check fs support
+     ```
 
 ### Practical Examples
 
-- **Scenario: Mount a USB Drive**:
-  - Identify USB device:
+1. **Mount and Access USB Drive**:
 
-    ```bash
-    lsblk
-    ```
+   ```bash
+   lsblk
+   sudo mkdir /mnt/usb
+   sudo mount /dev/sdb1 /mnt/usb
+   ls /mnt/usb
+   sudo umount /mnt/usb
+   ```
 
-    Output: Shows `/dev/sdb1` (e.g., vfat file system).
-  - Mount:
+2. **Add Permanent Mount**:
 
-    ```bash
-    sudo mkdir /mnt/usb
-    sudo mount /dev/sdb1 /mnt/usb
-    ls /mnt/usb  # Verify contents
-    ```
+   ```bash
+   blkid /dev/sdc1
+   sudo vim /etc/fstab
+   # Add: UUID=1234-ABCD /mnt/data xfs defaults 0 0
+   sudo mount -a
+   ```
 
-  - Unmount: `sudo umount /mnt/usb`.
-- **Scenario: Add Permanent Mount in `/etc/fstab`**:
-  - Get UUID:
+3. **Find Large Log Files**:
 
-    ```bash
-    blkid /dev/sdb1
-    ```
+   ```bash
+   find /var/log -type f -size +10M
+   ```
 
-    Output: `UUID="1234-ABCD" TYPE="ext4"`.
-  - Edit `/etc/fstab`:
+4. **Search for Config Files**:
 
-    ```bash
-    sudo vim /etc/fstab
-    # Add: UUID=1234-ABCD /mnt/data ext4 defaults 0 0
-    ```
+   ```bash
+   sudo updatedb
+   locate httpd.conf
+   sudo find /etc -name "*.conf"
+   ```
 
-  - Test: `sudo mount -a` (checks `fstab` for errors).
-- **Scenario: Check Disk Usage**:
-  - Monitor root file system:
+5. **Set Up LVM and Mount**:
 
-    ```bash
-    df -h /
-    ```
-
-    Output: Shows used/free space (e.g., `20G used, 50G free`).
-  - Find large directories:
-
-    ```bash
-    du -sh /var/* | sort -hr | head
-    ```
-
-- **Daily Use: Automount a Network File System**:
-  - Mount an NFS share:
-
-    ```bash
-    sudo mkdir /mnt/nfs
-    sudo mount -t nfs 192.168.1.100:/share /mnt/nfs
-    ```
-
-  - Add to `/etc/fstab`:
-
-    ```bash
-    192.168.1.100:/share /mnt/nfs nfs defaults 0 0
-    ```
-
-- **Scenario: Troubleshoot Mount Failure**:
-  - Mount fails? Check device:
-
-    ```bash
-    lsblk
-    blkid /dev/sdb1
-    ```
-
-  - Check logs: `journalctl -xe | grep mount`.
-  - Verify `fstab`: `sudo mount -a`.
+   ```bash
+   sudo pvcreate /dev/sdb1
+   sudo vgcreate datavg /dev/sdb1
+   sudo lvcreate -L 5G -n datalv datavg
+   sudo mkfs.xfs /dev/datavg/datalv
+   sudo mount /dev/datavg/datalv /mnt/data
+   ```
 
 ### Common Pitfalls
 
-- **Mounting Without Permissions**: Mounting system directories requires `sudo`.
-- **Incorrect `fstab` Syntax**: Errors in `/etc/fstab` can prevent booting. Always test with `mount -a` before rebooting.
-- **Device Not Found**: Ensure device exists (`lsblk`) and file system is supported (`modprobe vfat` for FAT32).
-- **Busy File System**: `umount` fails if files are in use. Check with `lsof /mnt` and close processes (`fuser -k /mnt`).
-- **UUID Mismatches**: If disks change, UUIDs in `fstab` may be invalid. Update with `blkid`.
-- **Full File System**: Running out of space causes errors. Monitor with `df -h`.
-
-### Best Practices and Tips
-
-- **Use UUIDs in `fstab`**: Prevents issues with changing device names (e.g., `/dev/sdb` to `/dev/sdc`).
-- **Test `fstab` Changes**: Run `sudo mount -a` to validate before rebooting.
-- **Mount Temporarily First**: Test mounts manually (`mount /dev/sdb1 /mnt`) before adding to `fstab`.
-- **Monitor Disk Usage**: Schedule checks:
+- **Invalid `fstab`**: Syntax errors prevent booting:
 
   ```bash
-  df -h > /var/log/disk_usage_$(date +%F).log
+  sudo mount -a  # Test before reboot
   ```
 
-- **RHEL 10 Tip**: Use Lightspeed for file system tasks (e.g., `rhel lightspeed "mount ext4 drive"` suggests `mount -t ext4`).
-- **Backup `fstab`**: Before editing:
+- **Device Busy**: Cannot unmount if files are open:
+
+  ```bash
+  lsof /mnt/data
+  sudo fuser -k /mnt/data
+  ```
+
+- **Missing File System**: Mount fails if device isn’t formatted:
+
+  ```bash
+  sudo mkfs.xfs /dev/sdb1
+  ```
+
+- **Permission Denied in `find`**: Use `sudo` for restricted paths:
+
+  ```bash
+  sudo find /root
+  ```
+
+- **Outdated `locate` Database**: Run `sudo updatedb` for recent files.
+- **No Space Left**: Check with `df -h` before mounting.
+
+### Best Practices
+
+- **Use UUIDs in `fstab`**: Ensures consistent mounts:
+
+  ```bash
+  blkid /dev/sdb1
+  ```
+
+- **Test Mounts**: Mount manually before adding to `fstab`.
+
+- **Backup `fstab`**:
 
   ```bash
   sudo cp /etc/fstab /etc/fstab.bak
   ```
 
-- **Clean Up Mount Points**: Remove unused mount directories (`rmdir /mnt/usb`) after unmounting.
+- **Monitor Disk Usage**: Automate checks:
 
-### Revision Quiz/Notes
+  ```bash
+  df -h > /var/log/disk_$(date +%F).log
+  ```
+
+- **Update `locate` Database**: Schedule `updatedb`:
+
+  ```bash
+  sudo crond -e
+  # Add: 0 0 * * * updatedb
+  ```
+
+- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "find large files"` suggests `find / -size +100M`).
+
+### Revision Quiz/Exercises
 
 - **Questions**:
-  - What command lists all mounted file systems? (`mount` or `cat /proc/mounts`)
-  - How do you find a device’s UUID? (`blkid /dev/sdb1`)
-  - What does `df -h` show? (Disk usage in human-readable format.)
-- **Quick Exercise**:
-  - Mount `/dev/sdc1` to `/mnt/data`, check contents, and unmount:
+  1. How do you mount by UUID? (`mount UUID=1234-ABCD /mnt`)
+  2. What finds files larger than 50MB? (`find / -size +50M`)
+  3. What does `/etc/fstab` do? (Defines permanent mounts.)
+- **Exercises**:
+  1. Mount and verify a partition:
 
-    ```bash
-    sudo mkdir /mnt/data
-    sudo mount /dev/sdc1 /mnt/data
-    ls /mnt/data
-    sudo umount /mnt/data
-    ```
+     ```bash
+     sudo mkdir /mnt/test
+     sudo mount /dev/sdb1 /mnt/test
+     ls /mnt/test
+     ```
 
-- **Self-Test**:
-  - Explain the `/etc/fstab` fields (device, mount point, file system, options, dump, pass).
-  - Why use UUIDs over device names in `fstab`? (Device names can change; UUIDs are unique.)
+  2. Find recent files:
 
----
+     ```bash
+     find /home -mmin -60
+     ```
+
+  3. Set up permanent NFS mount:
+
+     ```bash
+     sudo vim /etc/fstab
+     # Add: 192.168.1.100:/share /mnt/nfs nfs defaults 0 0
+     sudo mount -a
+     ```

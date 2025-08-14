@@ -482,8 +482,4 @@ Do you want me to make that diagram?
     ls -l ~/test
     ```
 
-- **Self-Test**:
-  - Explain the output of `ls -l` (columns: permissions, links, owner, group, size, date, name).
-  - Why use `mkdir -p`? (Creates parent directories if they don’t exist, avoids errors.)
-
 ---

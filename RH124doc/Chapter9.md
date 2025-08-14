@@ -1,196 +1,555 @@
 # RH124 Revision Notebook: Chapter 9 - Control Services and Daemons
 
-This notebook provides a detailed summary of Chapter 9 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on managing services and daemons using `systemd`, with comprehensive explanations, commands, practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
+This notebook summarizes Chapter 9 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on controlling services and daemons using `systemd`, with detailed explanations, commands, expanded practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
 
 ## Chapter 9: Control Services and Daemons
 
 ### Key Concepts
 
 - **Services and Daemons**:
-  - A **service** is a program or set of programs managed by the system, typically running in the background (e.g., `sshd` for SSH, `httpd` for web server).
-  - A **daemon** is a background process, often ending in `d` (e.g., `crond` for scheduled tasks).
-  - Services are critical for system functionality, such as networking, logging, or web hosting.
-- **Systemd Overview**:
-  - `systemd` is the default init system in RHEL, responsible for starting, stopping, and managing services.
-  - Units: Services (`.service`), timers (`.timer`), mounts (`.mount`), etc.
-  - Configuration files: Stored in `/etc/systemd/system` (custom) or `/usr/lib/systemd/system` (default).
-- **Service States**:
-  - **Enabled**: Starts automatically at boot.
-  - **Disabled**: Does not start at boot.
-  - **Running/Active**: Currently executing.
-  - **Stopped/Inactive**: Not running but may be started.
-  - **Failed**: Service failed to start or crashed.
-- **Service Management**:
-  - Use `systemctl` to control services (start, stop, enable, disable, check status).
-  - Services can be system-wide or user-specific (e.g., user services in `~/.config/systemd/user`).
+  - A **service** is a managed program, typically running in the background (e.g., `sshd` for SSH, `httpd` for web server).
+  - A **daemon** is a background process, often ending in `d` (e.g., `crond` for scheduling, `cupsd` for printing).
+  - Services provide critical system functions like networking, logging, or web hosting.
+- **Introduction to Systemd**:
+  - `systemd` is the default init system in RHEL, managing system startup, services, and resources.
+  - Organizes tasks into **units** (e.g., `.service` for services, `.timer` for scheduled tasks, `.mount` for mounts).
+  - Configuration files: `/usr/lib/systemd/system` (default), `/etc/systemd/system` (custom overrides).
+  - Benefits: Parallel startup, dependency management, detailed logging via `journalctl`.
 - **RHEL 9/10 Notes**:
-  - Improved `systemd` performance and logging in RHEL 10.
-  - RHEL Lightspeed (RHEL 10) can suggest service management commands (e.g., `rhel lightspeed "restart web server"` suggests `systemctl restart httpd`).
+  - Enhanced `systemd` performance and logging in RHEL 10.
+  - RHEL Lightspeed (RHEL 10) suggests commands (e.g., `rhel lightspeed "restart web server"` suggests `systemctl restart httpd`).
 
-### Important Commands
+### Identifying Automatically Started System Processes
 
-- **Service Status**:
+- **Purpose**: Determine which services start at boot to ensure critical functionality or optimize resources.
+- **Commands**:
+  - `systemctl list-unit-files --type=service --state=enabled`: List services set to start at boot.
+  - `systemctl list-units --type=service --state=running`: List currently running services.
+- **Examples**:
+  1. List enabled services:
 
-  ```bash
-  systemctl status sshd  # Show status of sshd service (active, inactive, failed)
-  systemctl is-active sshd  # Check if running (returns "active" or "inactive")
-  systemctl is-enabled sshd  # Check if enabled at boot
-  ```
+     ```bash
+     systemctl list-unit-files --type=service --state=enabled | grep enabled
+     ```
 
-- **Managing Services**:
+     Output: Shows services like `sshd.service`, `crond.service`.
+  2. Check running services:
 
-  ```bash
-  systemctl start sshd  # Start service
-  systemctl stop sshd  # Stop service
-  systemctl restart sshd  # Stop and start service
-  systemctl reload sshd  # Reload configuration without stopping (if supported)
-  systemctl enable sshd  # Enable service to start at boot
-  systemctl disable sshd  # Disable auto-start at boot
-  systemctl enable --now sshd  # Enable and start immediately
-  ```
+     ```bash
+     systemctl list-units --type=service --state=running
+     ```
 
-- **Listing Services**:
+     Output: Lists active services (e.g., `httpd`, `NetworkManager`).
+  3. Verify specific service (e.g., `sshd`):
 
-  ```bash
-  systemctl list-units --type=service  # List all loaded services
-  systemctl list-units --type=service --all  # Include inactive services
-  systemctl list-unit-files --type=service  # List service files (enabled/disabled)
-  ```
+     ```bash
+     systemctl is-enabled sshd
+     ```
 
-- **Troubleshooting Services**:
+     Output: `enabled` (starts at boot) or `disabled`.
 
-  ```bash
-  journalctl -u sshd  # View logs for sshd service
-  journalctl -xe  # View recent system logs with errors
-  systemctl is-failed sshd  # Check if service failed
-  ```
+### Describing Service Units
 
-- **Masking Services**:
+- **Definition**: A service unit (`.service` file) defines how `systemd` manages a service, including start/stop commands, dependencies, and settings.
+- **Location**:
+  - Default: `/usr/lib/systemd/system` (system-provided, read-only).
+  - Custom: `/etc/systemd/system` (user overrides or custom services).
+- **Structure**:
+  - `[Unit]`: Metadata (e.g., `Description`, `After` for dependencies).
+  - `[Service]`: Execution details (e.g., `ExecStart`, `Type`).
+  - `[Install]`: Boot behavior (e.g., `WantedBy=multi-user.target`).
+- **Example**:
+  - View `sshd.service`:
 
-  ```bash
-  systemctl mask sshd  # Prevent service from starting
-  systemctl unmask sshd  # Re-enable service
-  ```
+     ```bash
+     cat /usr/lib/systemd/system/sshd.service
+     ```
+
+     Output: Shows `ExecStart=/usr/sbin/sshd -D`, `WantedBy=multi-user.target`.
+
+- **Examples**:
+  1. Check `httpd` service unit:
+
+     ```bash
+     systemctl cat httpd
+     ```
+
+     Output: Displays unit file contents.
+  2. Create a custom service (e.g., `myapp.service`):
+
+     ```bash
+     sudo nano /etc/systemd/system/myapp.service
+     # Content:
+     [Unit]
+     Description=My Custom App
+     After=network.target
+     [Service]
+     ExecStart=/usr/bin/myapp --option
+     Restart=always
+     [Install]
+     WantedBy=multi-user.target
+     ```
+
+     Reload `systemd`: `sudo systemctl daemon-reload`.
+  3. Verify custom service:
+
+     ```bash
+     systemctl status myapp
+     ```
+
+### Viewing Service States
+
+- **States**:
+  - **Active (running)**: Service is running (e.g., `sshd` handling SSH connections).
+  - **Active (exited)**: Service ran once and exited (e.g., one-shot scripts).
+  - **Inactive**: Stopped but can be started.
+  - **Failed**: Failed to start or crashed.
+  - **Enabled**: Starts at boot.
+  - **Disabled**: Does not start at boot.
+  - **Static**: Cannot be enabled/disabled; started by dependencies (e.g., `systemd-journald`).
+- **Commands**:
+  - `systemctl status <service>`: Shows state, PID, logs.
+  - `systemctl is-active <service>`: Returns `active` or `inactive`.
+  - `systemctl is-enabled <service>`: Returns `enabled`, `disabled`, or `static`.
+
+- **Examples**:
+  1. Check `sshd` state:
+
+     ```bash
+     systemctl status sshd
+     ```
+
+     Output: `active (running)`, PID, recent logs.
+  2. Verify if `httpd` is active:
+
+     ```bash
+     systemctl is-active httpd
+     ```
+
+     Output: `active` or `inactive`.
+  3. Check if `crond` starts at boot:
+
+     ```bash
+     systemctl is-enabled crond
+     ```
+
+     Output: `enabled`.
+  4. Identify static services:
+
+     ```bash
+     systemctl list-unit-files --type=service --state=static
+     ```
+
+### Listing Service Units
+
+- **Purpose**: View all available, loaded, or running services to manage or troubleshoot.
+- **Commands**:
+  - `systemctl list-units --type=service`: List loaded, active services.
+  - `systemctl list-units --type=service --all`: Include inactive services.
+  - `systemctl list-unit-files --type=service`: List all service files (enabled, disabled, static).
+
+- **Examples**:
+  1. List running services:
+
+     ```bash
+     systemctl list-units --type=service --state=running
+     ```
+
+     Output: Shows `sshd`, `httpd`, etc.
+  2. List all service units:
+
+     ```bash
+     systemctl list-units --type=service --all | grep service
+     ```
+
+     Output: Includes `inactive` services like `bluetooth`.
+  3. List enabled and disabled services:
+
+     ```bash
+     systemctl list-unit-files --type=service | grep -E 'enabled|disabled'
+     ```
+
+  4. Save service list for audit:
+
+     ```bash
+     systemctl list-unit-files --type=service > /tmp/services_list.txt
+     ```
+
+### Verifying Service Status
+
+- **Purpose**: Confirm if a service is running, enabled, or failed.
+- **Commands**:
+  - `systemctl status <service>`: Detailed status (state, PID, logs).
+  - `systemctl is-active <service>`: Check running state.
+  - `systemctl is-failed <service>`: Check if failed.
+  - `journalctl -u <service>`: View service logs.
+
+- **Examples**:
+  1. Detailed status for `NetworkManager`:
+
+     ```bash
+     systemctl status NetworkManager
+     ```
+
+     Output: Shows `active (running)`, uptime, recent logs.
+  2. Check if `httpd` is running:
+
+     ```bash
+     systemctl is-active httpd
+     ```
+
+     Output: `active` or `inactive`.
+  3. Check for failed `httpd`:
+
+     ```bash
+     systemctl is-failed httpd
+     ```
+
+     Output: `failed` if crashed, else `active` or `inactive`.
+  4. View `sshd` logs:
+
+     ```bash
+     journalctl -u sshd -n 20
+     ```
+
+### Controlling System Services
+
+- **Purpose**: Start, stop, restart, or reload services to manage system functionality.
+- **Commands**:
+  - `systemctl start <service>`: Start service.
+  - `systemctl stop <service>`: Stop service.
+  - `systemctl restart <service>`: Stop and start.
+  - `systemctl reload <service>`: Reload config without stopping (if supported).
+
+- **Examples**:
+  1. Start `httpd`:
+
+     ```bash
+     sudo systemctl start httpd
+     systemctl status httpd
+     ```
+
+  2. Stop `bluetooth`:
+
+     ```bash
+     sudo systemctl stop bluetooth
+     systemctl is-active bluetooth  # Output: inactive
+     ```
+
+  3. Restart `sshd`:
+
+     ```bash
+     sudo systemctl restart sshd
+     ```
+
+  4. Reload `httpd` after config change:
+
+     ```bash
+     sudo systemctl reload httpd
+     journalctl -u httpd -f  # Monitor for errors
+     ```
+
+### Starting and Stopping Services
+
+- **Details**:
+  - Starting: Activates a service (e.g., for immediate use).
+  - Stopping: Halts a service (e.g., to free resources or troubleshoot).
+  - Use `sudo` for system services.
+- **Examples**:
+  1. Start `crond` for scheduling:
+
+     ```bash
+     sudo systemctl start crond
+     systemctl status crond
+     ```
+
+  2. Stop `cups` printing service:
+
+     ```bash
+     sudo systemctl stop cups
+     systemctl is-active cups  # Output: inactive
+     ```
+
+  3. Start `firewalld`:
+
+     ```bash
+     sudo systemctl start firewalld
+     ```
+
+  4. Stop `postfix` mail service:
+
+     ```bash
+     sudo systemctl stop postfix
+     journalctl -u postfix -n 10  # Check for stop confirmation
+     ```
+
+### Restarting and Reloading Services
+
+- **Restart**: Stops and starts a service (may interrupt users).
+- **Reload**: Updates configuration without stopping (if supported, e.g., `httpd`, `sshd`).
+- **Commands**:
+  - `systemctl restart <service>`: Full restart.
+  - `systemctl reload <service>`: Reload config.
+- **Examples**:
+  1. Restart `httpd` after updating `/etc/httpd/conf/httpd.conf`:
+
+     ```bash
+     sudo systemctl restart httpd
+     systemctl status httpd
+     ```
+
+  2. Reload `sshd` after changing `/etc/ssh/sshd_config`:
+
+     ```bash
+     sudo systemctl reload sshd
+     ```
+
+  3. Restart `NetworkManager`:
+
+     ```bash
+     sudo systemctl restart NetworkManager
+     journalctl -u NetworkManager -f
+     ```
+
+  4. Try reload, fallback to restart for `nginx`:
+
+     ```bash
+     sudo systemctl reload nginx || sudo systemctl restart nginx
+     ```
+
+### Listing Unit Dependencies
+
+- **Purpose**: View services a unit depends on or is required by to troubleshoot startup issues.
+- **Commands**:
+  - `systemctl list-dependencies <service>`: Show dependency tree.
+  - `systemctl show <service> -p Requires,Wants,After`: Show specific dependencies.
+- **Examples**:
+  1. View `httpd` dependencies:
+
+     ```bash
+     systemctl list-dependencies httpd
+     ```
+
+     Output: Shows dependencies like `network.target`.
+  2. Check what `sshd` requires:
+
+     ```bash
+     systemctl show sshd -p Requires
+     ```
+
+  3. List services depending on `NetworkManager`:
+
+     ```bash
+     systemctl list-dependencies --reverse NetworkManager
+     ```
+
+  4. Debug startup failure:
+
+     ```bash
+     systemctl list-dependencies firewalld
+     journalctl -u firewalld  # Check if dependencies failed
+     ```
+
+### Masking and Unmasking Services
+
+- **Purpose**:
+  - **Mask**: Prevents a service from starting (manually or automatically).
+  - **Unmask**: Re-enables a masked service.
+- **Commands**:
+  - `systemctl mask <service>`: Disable start.
+  - `systemctl unmask <service>`: Re-enable.
+- **Examples**:
+  1. Mask `bluetooth` to prevent startup:
+
+     ```bash
+     sudo systemctl mask bluetooth
+     systemctl status bluetooth  # Output: masked
+     ```
+
+  2. Unmask `bluetooth`:
+
+     ```bash
+     sudo systemctl unmask bluetooth
+     sudo systemctl start bluetooth
+     ```
+
+  3. Mask unused `avahi-daemon`:
+
+     ```bash
+     sudo systemctl mask avahi-daemon
+     ```
+
+  4. Verify masking:
+
+     ```bash
+     systemctl list-unit-files | grep masked
+     ```
+
+### Enabling Services to Start or Stop at Boot
+
+- **Purpose**: Configure services to start (or not) during system boot.
+- **Commands**:
+  - `systemctl enable <service>`: Start at boot.
+  - `systemctl disable <service>`: Prevent start at boot.
+  - `systemctl enable --now <service>`: Enable and start immediately.
+- **Examples**:
+  1. Enable `httpd` at boot:
+
+     ```bash
+     sudo systemctl enable httpd
+     systemctl is-enabled httpd  # Output: enabled
+     ```
+
+  2. Disable `cups` at boot:
+
+     ```bash
+     sudo systemctl disable cups
+     systemctl is-enabled cups  # Output: disabled
+     ```
+
+  3. Enable and start `firewalld`:
+
+     ```bash
+     sudo systemctl enable --now firewalld
+     systemctl status firewalld
+     ```
+
+  4. Disable `postfix`:
+
+     ```bash
+     sudo systemctl disable postfix
+     systemctl list-unit-files | grep postfix
+     ```
+
+### Summary of systemctl Commands
+
+- **Status and Verification**:
+  - `systemctl status <service>`: Detailed state and logs.
+  - `systemctl is-active <service>`: Check running status.
+  - `systemctl is-enabled <service>`: Check boot status.
+  - `systemctl is-failed <service>`: Check failure status.
+- **Control**:
+  - `start`, `stop`, `restart`, `reload`: Manage service state.
+  - `enable`, `disable`, `enable --now`: Manage boot behavior.
+  - `mask`, `unmask`: Prevent/allow starting.
+- **Listing**:
+  - `list-units --type=service`: Loaded services.
+  - `list-units --type=service --all`: All services.
+  - `list-unit-files --type=service`: All service files.
+- **Dependencies and Logs**:
+  - `list-dependencies <service>`: Dependency tree.
+  - `journalctl -u <service>`: Service logs.
 
 ### Practical Examples
 
-- **Scenario: Manage SSH Service**:
-  - Check if SSH is running:
+1. **Manage SSH Access**:
 
-    ```bash
-    systemctl status sshd
-    ```
+   ```bash
+   systemctl status sshd          # Check state
+   sudo systemctl restart sshd    # Restart after config change
+   systemctl is-enabled sshd      # Confirm enabled
+   journalctl -u sshd -n 20       # View recent logs
+   ```
 
-    Output: Shows `active (running)` or `inactive`.
-  - Start SSH if stopped:
+2. **Set Up Web Server**:
 
-    ```bash
-    sudo systemctl start sshd
-    ```
+   ```bash
+   sudo systemctl enable --now httpd  # Enable and start
+   systemctl status httpd            # Verify
+   sudo systemctl reload httpd       # Reload after config change
+   systemctl list-dependencies httpd  # Check dependencies
+   ```
 
-  - Enable at boot:
+3. **Troubleshoot Failed Service**:
 
-    ```bash
-    sudo systemctl enable sshd
-    ```
+   ```bash
+   systemctl is-failed crond         # Check failure
+   journalctl -u crond -b            # View logs
+   sudo systemctl restart crond      # Restart after fixing
+   ```
 
-- **Scenario: Restart Web Server**:
-  - Restart Apache (`httpd`) after configuration change:
+4. **Prevent Unnecessary Service**:
 
-    ```bash
-    sudo systemctl restart httpd
-    ```
+   ```bash
+   sudo systemctl mask avahi-daemon  # Mask service
+   systemctl status avahi-daemon     # Confirm masked
+   sudo systemctl unmask avahi-daemon  # Re-enable if needed
+   ```
 
-  - Reload without interrupting connections (if supported):
+5. **Monitor and Log Services**:
 
-    ```bash
-    sudo systemctl reload httpd
-    ```
+   ```bash
+   journalctl -u NetworkManager -f    # Real-time logs
+   systemctl list-units --type=service --state=running > /tmp/active_services.txt
+   ```
 
-  - Verify: `systemctl status httpd`.
-- **Scenario: Troubleshoot Failed Service**:
-  - Check if `httpd` failed:
+6. **Custom Service Creation**:
 
-    ```bash
-    systemctl is-failed httpd
-    journalctl -u httpd -b  # View logs since last boot
-    ```
-
-  - Fix (e.g., correct config in `/etc/httpd/conf/httpd.conf`), then restart:
-
-    ```bash
-    sudo systemctl restart httpd
-    ```
-
-- **Scenario: Prevent Unwanted Service**:
-  - Mask a service to prevent accidental start:
-
-    ```bash
-    sudo systemctl mask bluetooth
-    systemctl status bluetooth  # Shows "masked"
-    ```
-
-- **Daily Use: List Running Services**:
-  - View active services:
-
-    ```bash
-    systemctl list-units --type=service --state=running
-    ```
-
-  - Save to file for audit:
-
-    ```bash
-    systemctl list-units --type=service --state=running > services.txt
-    ```
-
-- **Scenario: Monitor Service Logs**:
-  - Watch real-time logs for `crond`:
-
-    ```bash
-    journalctl -u crond -f
-    ```
+   ```bash
+   sudo nano /etc/systemd/system/backup.service
+   # Content:
+   [Unit]
+   Description=Daily Backup Service
+   After=network.target
+   [Service]
+   ExecStart=/bin/bash /scripts-UPDATEDscripts/backup.sh
+   [Install]
+   WantedBy=multi-user.target
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now backup
+   ```
 
 ### Common Pitfalls
 
-- **Forgetting `sudo`**: Service management requires root privileges (e.g., `sudo systemctl start sshd`).
-- **Restart vs. Reload**: `restart` stops and starts, potentially disrupting users; use `reload` when possible (e.g., `systemctl reload httpd`).
-- **Masked Services**: Attempting to start a masked service fails. Check with `systemctl status` and unmask if needed.
-- **Ignoring Logs**: Service failures often have clues in `journalctl -u service`. Always check logs before retrying.
-- **Disabling Critical Services**: Disabling services like `sshd` can lock you out of remote access. Verify impact first.
-- **Unit Not Found**: Misspelling service names (e.g., `systemctl start ssh` instead of `sshd`) causes errors. Use tab completion.
+- **No `sudo`**: Commands like `start`, `stop`, `enable` require root (e.g., `sudo systemctl start sshd`).
+- **Restart vs. Reload**: `restart` disrupts users; use `reload` when possible (e.g., `systemctl reload httpd`).
+- **Masked Services**: Starting a masked service fails; check with `systemctl status` and unmask.
+- **Incorrect Names**: Misspelling (e.g., `ssh` vs. `sshd`) causes “unit not found” errors. Use tab completion.
+- **Disabling Critical Services**: Disabling `sshd` may block remote access; verify impact.
+- **Missing Dependencies**: A service may fail if dependencies (e.g., `network.target`) aren’t met.
 
-### Best Practices and Tips
+### Best Practices
 
-- **Check Status First**: Always run `systemctl status service` before and after changes to confirm state.
-- **Use `reload` When Possible**: Minimizes downtime (e.g., `systemctl reload httpd` for config changes).
-- **Monitor Logs**: Use `journalctl -u service -f` for real-time debugging.
-- **Enable Essential Services**: Ensure critical services (e.g., `sshd`, `crond`) are enabled (`systemctl enable`).
-- **Script Service Checks**: Automate status checks:
+- **Always Check Status**: Use `systemctl status <service>` before/after changes.
+- **Prefer `reload`**: Minimizes downtime (e.g., `systemctl reload sshd`).
+- **Monitor Logs**: Use `journalctl -u <service> -f` for debugging.
+- **Backup Configs**: Save copies before editing (e.g., `sudo cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak`).
+- **Automate Checks**:
 
   ```bash
-  for s in sshd httpd; do systemctl status $s >> service_status.log; done
+  for s in sshd httpd crond; do systemctl status $s >> /tmp/service_status.log; done
   ```
 
-- **RHEL 10 Tip**: Use Lightspeed for service tasks (e.g., `rhel lightspeed "check service status"` suggests `systemctl status`).
-- **Backup Configurations**: Before editing service configs (e.g., `/etc/httpd`), back up (e.g., `sudo cp /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.conf.bak`).
+- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "manage services"`).
 
-### Revision Quiz/Notes
+### Revision Quiz/Exercises
 
 - **Questions**:
-  - What command starts and enables `httpd` in one step? (`systemctl enable --now httpd`)
-  - What’s the difference between `restart` and `reload`? (`restart` stops and starts; `reload` updates config without stopping.)
-  - How do you view logs for `sshd`? (`journalctl -u sshd`)
-- **Quick Exercise**:
-  - Check if `crond` is running, enable it, and view its logs:
+  1. How do you enable and start `httpd` in one command? (`systemctl enable --now httpd`)
+  2. What’s the difference between `restart` and `reload`? (`restart` stops/starts; `reload` updates config.)
+  3. How do you check `sshd` logs? (`journalctl -u sshd`)
+  4. Why mask a service? (Prevents starting for security/resource management.)
+- **Exercises**:
+  1. Manage `crond`:
 
-    ```bash
-    systemctl status crond
-    sudo systemctl enable crond
-    journalctl -u crond -n 10
-    ```
+     ```bash
+     systemctl status crond
+     sudo systemctl enable --now crond
+     journalctl -u crond -n 10
+     ```
 
-- **Self-Test**:
-  - Explain the output of `systemctl status sshd` (shows service state, PID, recent logs).
-  - Why mask a service? (Prevents accidental start, e.g., for security or resource management.)
+  2. Troubleshoot `httpd`:
 
----
+     ```bash
+     systemctl is-failed httpd
+     journalctl -u httpd -b
+     sudo systemctl restart httpd
+     ```
+
+  3. Mask/unmask `bluetooth`:
+
+     ```bash
+     sudo systemctl mask bluetooth
+     systemctl status bluetooth
+     sudo systemctl unmask bluetooth
+     ```
