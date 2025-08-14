@@ -1,10 +1,6 @@
-# Chapter 4 - Get Help in Red Hat Enterprise Linux
+# Chapter 4: Get Help in Red Hat Enterprise Linux
 
-This notebook provides a detailed summary of Chapter 4 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on accessing help resources and documentation on RHEL systems, with comprehensive explanations, commands, practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
-
-## Chapter 4: Get Help in Red Hat Enterprise Linux
-
-### Key Concepts
+## Key Concepts
 
 - **Importance of Help Systems**: RHEL provides multiple built-in and online resources to troubleshoot issues, learn commands, and understand system configurations, essential for efficient administration.
 - **Types of Help Resources**:

@@ -1,10 +1,6 @@
-# Chapter 6 - Manage Local Users and Groups
+# Chapter 6: Manage Local Users and Groups
 
-This enhanced notebook provides a comprehensive and well-organized summary of Chapter 6 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It covers managing local users and groups, incorporating all requested topics, including user and group definitions, UID ranges, superuser concepts, `sudo` configuration, password policies, and more. The content is structured with clear explanations, command tables, practical examples, common pitfalls, best practices, and revision exercises to support learning and real-world application.
-
-## Chapter 6: Manage Local Users and Groups
-
-### Key Concepts
+## Key Concepts
 
 - **What is a User?**
   - A user is an entity (human or process) that interacts with the system, identified by a unique **User ID (UID)**.

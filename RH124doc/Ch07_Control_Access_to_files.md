@@ -1,8 +1,4 @@
-# Chapter 7 - Control Access to Files
-
-This notebook provides a detailed summary of Chapter 7 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on managing file system permissions to control access to files and directories, with comprehensive explanations, commands, practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
-
-## Chapter 7: Control Access to Files
+# Chapter 7: Control Access to Files
 
 ### Key Concepts
 

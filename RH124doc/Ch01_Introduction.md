@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Red Hat System Administration I
+# Get Started with Red Hat Enterprise Linux
 
-This notebook summarizes key concepts, commands, and tips from the RH124 course for quick revision and daily use. It's based on Red Hat Enterprise Linux (RHEL) 9/10. I've expanded it with more detailed explanations, additional commands, practical examples, common pitfalls, best practices, and revision exercises to make it more comprehensive for revision and real-world application. Focus on practical application. I'll expand this notebook chapter by chapter as needed.
-
-## Chapter 1: Get Started with Red Hat Enterprise Linux
-
-### Key Concepts (Expanded)
+## Key Concepts (Expanded)
 
 - **Linux Overview**: Linux is a free, open-source operating system kernel developed by Linus Torvalds in 1991, inspired by UNIX. It's modular, multi-user, and multitasking, making it ideal for servers, desktops, and cloud environments. Key advantages include stability, security (through community audits), and customizability.
 - **Open-Source Principles**:
