@@ -1,4 +1,4 @@
-# Here’s a clear summary of the **stages of booting** in a typical Linux system
+# **stages of booting** in a typical Linux system
 
 ##
 
@@ -71,7 +71,3 @@
 * **systemctl get-default** shows the current default target.
 * **systemctl isolate \[target]** switches to the specified target immediately.
 * systemd targets are more flexible and can be extended or customized easily.
-
----
-
-Let me know if you want commands or how to work with systemd targets!
