@@ -329,7 +329,7 @@ This notebook summarizes Chapter 15 of the Red Hat System Administration I (RH12
      # Fix: Verify: blkid
      ```
 
-### Automatic Mounting of Removable Storage Devices
+### Automatic Mounting of Removable Storage Device
 
 - **Tool**: `systemd` and `udisks2` handle automounting (e.g., USB drives in `/media/username`).
 - **Examples**:
