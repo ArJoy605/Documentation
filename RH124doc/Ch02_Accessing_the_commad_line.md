@@ -144,6 +144,9 @@ GNOME is the default graphical desktop environment in RHEL, providing an intuiti
 ### Editing the Command Line
 
 - **Key Shortcuts**:
+
+---
+
 | Shortcut | Description                                      |
 |----------|--------------------------------------------------|
 | Ctrl+A   | Move cursor to start of line                     |
@@ -152,6 +155,8 @@ GNOME is the default graphical desktop environment in RHEL, providing an intuiti
 | Ctrl+K   | Clear from cursor to end of line                 |
 | Ctrl+C   | Interrupt current command                        |
 | Ctrl+Z   | Suspend current command (resume with `fg`)       |
+
+---
 
 - Example: Type `ls /etc`, press `Ctrl+A` to jump to the start, then add `sudo` to make `sudo ls /etc`.
 
