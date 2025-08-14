@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 8 - Monitor and Manage Linux Processes
+# Chapter 8: Monitor and Manage Linux Processes
 
-This notebook summarizes Chapter 8 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It covers monitoring and managing Linux processes, including process states, job control, signals, administrative user management, and real-time monitoring, with detailed commands, expanded practical examples, common pitfalls, best practices, and revision exercises.
-
-## Chapter 8: Monitor and Manage Linux Processes
-
-### Key Concepts
+## Key Concepts
 
 - **Processes in Linux**:
   - A process is a running instance of a program, identified by a unique Process ID (PID).

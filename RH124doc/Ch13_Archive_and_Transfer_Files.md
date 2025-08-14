@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 13 - Archive and Transfer Files
+# Chapter 13: Archive and Transfer Files
 
-This notebook summarizes Chapter 13 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on creating and managing compressed archives with `tar`, and securely transferring files using `scp`, `sftp`, and `rsync`, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
-
-## Chapter 13: Archive and Transfer Files
-
-### Key Concepts
+## Key Concepts
 
 - **Archiving**:
   - Combines multiple files or directories into a single file (e.g., `.tar`) for backup, storage, or transfer.

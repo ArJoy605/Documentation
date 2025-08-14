@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 12 - Manage Networking
+# Chapter 12: Manage Networking
 
-This notebook summarizes Chapter 12 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on managing network configurations, troubleshooting connectivity, and securing network interfaces using `NetworkManager` and related tools, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
-
-## Chapter 12: Manage Networking
-
-### Key Concepts
+## Key Concepts
 
 - **Networking in Linux**:
   - Enables communication for services like SSH, web servers, and file sharing.

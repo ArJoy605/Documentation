@@ -1,4 +1,4 @@
-# RH124 Revision Notebook: Chapter 3 - Manage Files from the Command Line
+# Chapter 3 - Manage Files from the Command Line
 
 This notebook provides a detailed summary of Chapter 3 from the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on managing files and directories via the command line, with practical commands, examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
 

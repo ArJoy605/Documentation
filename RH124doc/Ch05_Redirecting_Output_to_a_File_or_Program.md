@@ -1,10 +1,6 @@
-# Chapter 5: Linux System Administration (RH124) - Detailed Notes
+# Redirecting Output to a File or Program
 
-This chapter covers essential Linux administration concepts, focusing on input/output redirection, pipelines, text editing with Vim, and shell environment configuration. Below is a detailed breakdown of each topic.
-
----
-
-## 1. Redirecting Output to a File or Program
+## Types of Streams
 
 Linux uses three standard streams for input and output:
 

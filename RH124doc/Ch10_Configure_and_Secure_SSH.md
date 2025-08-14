@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 10 - Configure and Secure SSH
+# Chapter 10: Configure and Secure SSH
 
-This notebook summarizes Chapter 10 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on configuring and securing the Secure Shell (SSH) service for remote access, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
-
-## Chapter 10: Configure and Secure SSH
-
-### Key Concepts
+## Key Concepts
 
 - **What is OpenSSH?**:
   - OpenSSH is an open-source implementation of the SSH protocol for secure remote access and file transfer.

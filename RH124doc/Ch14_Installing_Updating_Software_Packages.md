@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 14 - Install and Update Software Packages
+# Chapter 14 - Install and Update Software Packages
 
-This notebook summarizes Chapter 14 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on registering systems with Red Hat Subscription Management, managing software packages with `dnf` (successor to `yum`), handling RPM packages, and managing AppStream module streams, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
-
-## Chapter 14: Install and Update Software Packages
-
-### Key Concepts
+## Key Concepts
 
 - **Package Management**:
   - Software is distributed as **RPM packages** (`.rpm` files) containing binaries, libraries, and documentation.

@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 11 - Analyze and Store Logs
+# Chapter 11 - Analyze and Store Logs
 
-This notebook summarizes Chapter 11 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on analyzing and storing system logs, managing `rsyslog`, configuring `logrotate`, maintaining system journals, and setting accurate time for logging, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
-
-## Chapter 11: Analyze and Store Logs
-
-### Key Concepts
+## Key Concepts
 
 - **System Logging**:
   - Logs capture system events (e.g., errors, user logins, service activities) for troubleshooting, auditing, and monitoring.

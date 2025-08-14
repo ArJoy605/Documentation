@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 9 - Control Services and Daemons
+# Chapter 9: Control Services and Daemons
 
-This notebook summarizes Chapter 9 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on controlling services and daemons using `systemd`, with detailed explanations, commands, expanded practical examples, common pitfalls, best practices, and revision exercises for effective learning and real-world application.
-
-## Chapter 9: Control Services and Daemons
-
-### Key Concepts
+## Key Concepts
 
 - **Services and Daemons**:
   - A **service** is a managed program, typically running in the background (e.g., `sshd` for SSH, `httpd` for web server).

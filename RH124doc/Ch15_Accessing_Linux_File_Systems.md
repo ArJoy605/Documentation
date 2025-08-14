@@ -1,10 +1,6 @@
-# RH124 Revision Notebook: Chapter 15 - Access Linux File Systems
+# Access Linux File Systems
 
-This notebook summarizes Chapter 15 of the Red Hat System Administration I (RH124) course, based on Red Hat Enterprise Linux (RHEL) 9/10. It focuses on identifying, mounting, unmounting, and managing Linux file systems, as well as searching for files using `find` and `locate`, with detailed explanations, commands, extensive practical examples, corner cases, common pitfalls, best practices, and revision exercises.
-
-## Chapter 15: Accessing Linux File Systems
-
-### Key Concepts
+## Key Concepts
 
 - **File Systems**:
   - Organize and store data on storage devices (e.g., disks, SSDs).
