@@ -12,7 +12,7 @@
   - States reveal process behavior (e.g., running, waiting, or hung), aiding in performance tuning and troubleshooting.
   - Example: Identifying zombies (`Z` state) prevents resource leaks; high `D` state processes indicate I/O bottlenecks.
 
-### Process States
+## Process States
 
 - **Running (R)**: Actively using CPU.
 - **Sleeping (S)**: Waiting for an event (interruptible, e.g., user input).
@@ -35,7 +35,7 @@
      cat /proc/1234/stat | awk '{print $3}'  # Shows state (e.g., R, Z)
      ```
 
-### Listing Processes
+## Listing Processes
 
 - **Commands**:
   - `ps`: Current shell processes.
@@ -78,7 +78,7 @@
      ps -ef | head -5  # Top 5 with PPID
      ```
 
-### Controlling Jobs
+## Controlling Jobs
 
 - **Foreground vs Background**:
   - Foreground: Terminal-bound (e.g., `vim`).
@@ -116,7 +116,7 @@
      jobs               # List all jobs
      ```
 
-### Killing Processes
+## Killing Processes
 
 - **Signals**:
   - `SIGHUP` (1): Reload/restart daemon.
@@ -128,7 +128,7 @@
   - `SIGSTOP` (19): Pause (unblockable).
   - `SIGTSTP` (20): Stop (`Ctrl+Z`).
   - **Actions**: Term (end), Core (end with dump), Stop (pause).
-  - List signals: `kill -l`.
+  - List signals: `kill -l`. Important because different systems may have different signal numbers.
 
 - **Commands**:
   - `kill <pid>`: Send `SIGTERM`.
@@ -165,7 +165,7 @@
      killall httpd      # Terminate all httpd processes
      ```
 
-### Logging Users Out Administratively
+## Logging Users Out Administratively
 
 - **Purpose**: End user sessions for security or resource cleanup.
 - **Commands**:
@@ -196,7 +196,7 @@
      pkill -9 -u bob    # Force terminate bob’s processes
      ```
 
-### Monitoring Process Activity
+## Monitoring Process Activity
 
 - **Tools**:
   - `ps`: Static snapshot.
@@ -244,7 +244,7 @@
      lsof -p 1234       # List files opened by PID 1234
      ```
 
-### Describing Load Average
+## Describing Load Average
 
 - **Definition**: Average number of processes in run queue (running or waiting) over 1, 5, and 15 minutes.
 - **Commands**:
@@ -285,7 +285,7 @@
      uptime >> /var/log/load_monitor.log
      ```
 
-### Practical Examples
+## Practical Examples
 
 1. **Identify and Terminate Resource-Hogging Process**:
 
@@ -328,7 +328,7 @@
    watch -n 5 'ps aux --sort -%mem'   # Monitor memory usage
    ```
 
-### Common Pitfalls
+## Common Pitfalls
 
 - **Overusing `SIGKILL`**: `kill -9` risks data loss; try `kill` first.
 - **Zombies**: Unreaped zombies waste resources; kill parent process.
@@ -337,7 +337,7 @@
 - **Syntax Errors**: `ps -aux` may fail; use `ps aux` or `ps -u <user>`.
 - **Missing `htop`**: Install with `sudo dnf install htop`.
 
-### Best Practices
+## Best Practices
 
 - **Use `top` or `htop`**: Sort with `P` (CPU) or `M` (memory).
 - **Prefer `SIGTERM`**: Allows cleanup before termination.
@@ -352,7 +352,7 @@
 - **Use `pstree`**: Visualize process trees for debugging.
 - **RHEL 10**: Use `rhel lightspeed "monitor processes"` for command suggestions.
 
-### Revision Quiz/Exercises
+## Revision
 
 - **Questions**:
   1. How do `ps aux` and `ps -ef` differ? (`aux`: BSD, user-oriented; `-ef`: UNIX, shows PPID.)

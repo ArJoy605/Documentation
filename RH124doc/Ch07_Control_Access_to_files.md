@@ -1,6 +1,6 @@
 # Chapter 7: Control Access to Files
 
-### Key Concepts
+## Key Concepts
 
 - **Linux File Permissions**:
   - Every file and directory has associated permissions defining who can read, write, or execute it.
@@ -27,11 +27,8 @@
 - **File Access Control Lists (ACLs)**:
   - Extend standard permissions for fine-grained control (e.g., specific users or groups).
   - Managed with `setfacl` and `getfacl`.
-- **RHEL 9/10 Notes**:
-  - Enhanced ACL support with better performance in RHEL 10.
-  - RHEL Lightspeed (RHEL 10) can suggest permission commands (e.g., `rhel lightspeed "set read-only for group"`).
 
-### Important Commands
+## Important Commands
 
 - **Viewing Permissions**:
 
@@ -45,6 +42,7 @@
 
   ```bash
   chmod u+rwx file.txt  # Add read, write, execute for owner
+  chmod +x file.txt  # Add execute for all
   chmod g-w file.txt  # Remove write for group
   chmod o=r file.txt  # Set read-only for others
   chmod 644 file.txt  # Set permissions numerically (rw-r--r--)
@@ -88,7 +86,7 @@
   setfacl -b file.txt  # Remove all ACLs
   ```
 
-### Practical Examples
+## Practical Examples
 
 - **Scenario: Secure a Configuration File**:
   - Restrict `/etc/myconfig` to owner-only access:
@@ -145,7 +143,7 @@
     ls -l /usr/local/bin/myscript  # Verify: -rwsr-xr-x
     ```
 
-### Common Pitfalls
+## Common Pitfalls
 
 - **Incorrect Permissions**: Setting `777` (world-writable) is insecure; use least privilege (e.g., `644` for files, `755` for directories).
 - **Forgetting `-R`**: Without `-R`, `chmod` or `chown` only affects the target, not directory contents.
@@ -154,32 +152,12 @@
 - **ACL Conflicts**: ACLs override standard permissions but can be confusing if not documented. Use `getfacl` to verify.
 - **Permission Denied Errors**: Operations in system directories (e.g., `/etc`) require `sudo`. Check ownership with `ls -l`.
 
-### Best Practices and Tips
+## Best Practices and Tips
 
 - **Follow Least Privilege**: Grant only necessary permissions (e.g., `640` for sensitive files).
 - **Use Groups for Collaboration**: Assign shared directories to a group with `g+rw` and SetGID (`g+s`).
 - **Backup Before Changes**: Copy critical files (e.g., `sudo cp /etc/myconfig /etc/myconfig.bak`) before modifying permissions.
 - **Verify Changes**: Always use `ls -l` or `getfacl` after changing permissions or ownership.
-- **Automate Checks**: Script permission audits (e.g., `find / -perm -4000` for SetUID files).
-- **RHEL 10 Tip**: Use Lightspeed for permission tasks (e.g., `rhel lightspeed "make directory group-writable"` suggests `chmod g+rw`).
 - **Document ACLs**: Maintain a log of ACL changes (e.g., `getfacl /shared > acl_backup.txt`).
-
-### Revision Quiz/Notes
-
-- **Questions**:
-  - What does `chmod 750 /mydir` do? (Owner: rwx, group: rx, others: no access.)
-  - What’s the role of the sticky bit? (Prevents non-owners from deleting files in a directory.)
-  - How do you grant `user3` read access to `file.txt` via ACL? (`setfacl -m u:user3:r file.txt`)
-- **Quick Exercise**:
-  - Create a directory `/data`, set owner to `root`, group to `analysts`, permissions to `rwxr-x---`, and add ACL for `user2` with read/write:
-
-    ```bash
-    sudo mkdir /data
-    sudo groupadd analysts
-    sudo chown root:analysts /data
-    sudo chmod 750 /data
-    sudo setfacl -m u:user2:rw /data
-    ls -ld /data; getfacl /data
-    ```
 
 ---

@@ -71,6 +71,23 @@
 
 - **Configuring `sudo`**:
   - Managed via `/etc/sudoers`, edited with `visudo` for syntax validation.
+  - User specifications
+    - Format:
+
+    ```bash
+    user  host = (run-as) options: command
+    ```
+
+    - `user` → Linux username (or `%group` for groups)
+
+    - `host` → host(s) where this rule applies (`ALL` = any host)
+
+    - `(run-as)` → which user(s) the command can run as (root by default)
+
+    - `options` → special flags (NOPASSWD, SETENV, etc.)
+
+    - `command` → the command(s) allowed
+
   - Format: `user host=(run_as) commands`
     - Example: `jdoe ALL=(ALL) ALL` allows `jdoe` to run any command as any user on all hosts.
   - Group-based: `%wheel ALL=(ALL) ALL` grants `wheel` group members full `sudo` access.
@@ -237,27 +254,4 @@
 
 - **Sudo Best Practices**: Use group-based permissions (e.g., `%wheel`) and restrict commands for security.
 - **Password Aging**: Set balanced policies (e.g., `chage -M 90 -m 7`) for security and usability.
-- **RHEL 10 Tip**: Use Lightspeed for suggestions (e.g., `rhel lightspeed "add user with home directory"`).
 - **Monitor Files**: Check `/etc/passwd`, `/etc/shadow`, and `/etc/group` with `cat` or `less` after changes.
-
-### Revision Quiz/Exercises
-
-- **Questions**:
-  1. What command adds `user1` to `admins` without removing other groups? (`usermod -aG admins user1`)
-  2. What are the seven fields in `/etc/passwd`? (username, password, UID, GID, GECOS, home_dir, shell)
-  3. How do you lock a user account? (`usermod -L user1`)
-  4. What’s the difference between `sudo su -` and `sudo -i`? (Both load root’s environment, but `sudo -i` uses `sudo` authentication and logging.)
-  5. How do you set a 90-day password expiration? (`chage -M 90 user1`)
-  6. What does `/etc/group` store? (Group name, password, GID, members)
-
-- **Quick Exercise**:
-  - Create user `testuser`, add to `testers` group, set password, and restrict to `systemctl` via `sudo`:
-
-    ```bash
-    sudo groupadd testers
-    sudo useradd -m -c "Test User" -G testers testuser
-    sudo passwd testuser
-    sudo visudo
-    # Add: testuser ALL=(ALL) /usr/bin/systemctl
-    id testuser
-    ```
