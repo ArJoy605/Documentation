@@ -16,9 +16,6 @@
 - **Security Features**:
   - Restrict root login, change ports, disable password authentication, or limit users.
   - Integrates with SELinux and `firewalld` for access control.
-- **RHEL 9/10 Notes**:
-  - RHEL 10 prefers stronger ciphers (e.g., `ed25519` keys).
-  - RHEL Lightspeed suggests SSH commands (e.g., `rhel lightspeed "secure SSH"` suggests disabling root login).
 
 ### Accessing Remote Command Line with SSH
 
@@ -210,7 +207,10 @@
   2. Generate Ed25519 key:
 
      ```bash
-     ssh-keygen -t ed25519
+     ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_user1 -C "user1@client"
+     # Custom filename and comment
+     # Output: "Your identification has been saved in ~/.ssh/id_ed25519_user1"
+     # Output: "Your public key has been saved in ~/.ssh/id_ed25519_user1.pub"
      ```
 
   3. Generate key with passphrase:
@@ -236,14 +236,14 @@
   1. Copy key to server:
 
      ```bash
-     ssh-copy-id user1@192.168.1.100
+     ssh-copy-id -i ~/.ssh/id_ed25519_user1.pub user1@192.168.1.100
      ```
 
-     Output: Prompts for password, then copies `id_rsa.pub`.
+     Output: Prompts for password, then copies `id_ed25519_user1.pub`.
   2. Manual copy:
 
      ```bash
-     cat ~/.ssh/id_rsa.pub | ssh user1@server 'cat >> ~/.ssh/authorized_keys'
+     cat ~/.ssh/id_ed25519_user1.pub | ssh user1@server 'cat >> ~/.ssh/authorized_keys'
      ```
 
   3. Verify key on server:
@@ -420,7 +420,7 @@
 1. **Set Up Secure SSH Access**:
 
    ```bash
-   ssh-keygen -t ed25519
+   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519_user1 -C "user1@client"
    ssh-copy-id user1@192.168.1.100
    sudo vim /etc/ssh/sshd_config
    # Set: PermitRootLogin no

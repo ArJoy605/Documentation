@@ -11,9 +11,6 @@
   - Organizes tasks into **units** (e.g., `.service` for services, `.timer` for scheduled tasks, `.mount` for mounts).
   - Configuration files: `/usr/lib/systemd/system` (default), `/etc/systemd/system` (custom overrides).
   - Benefits: Parallel startup, dependency management, detailed logging via `journalctl`.
-- **RHEL 9/10 Notes**:
-  - Enhanced `systemd` performance and logging in RHEL 10.
-  - RHEL Lightspeed (RHEL 10) suggests commands (e.g., `rhel lightspeed "restart web server"` suggests `systemctl restart httpd`).
 
 ### Identifying Automatically Started System Processes
 
@@ -349,10 +346,12 @@
 ### Masking and Unmasking Services
 
 - **Purpose**:
-  - **Mask**: Prevents a service from starting (manually or automatically).
+  - **Mask**:
+    - Prevents a service from starting (manually or automatically).
+    - Complelety blocks the service, making it impossible to start until unmasked.
   - **Unmask**: Re-enables a masked service.
 - **Commands**:
-  - `systemctl mask <service>`: Disable start.
+  - `systemctl mask <service>`: Disable starting.
   - `systemctl unmask <service>`: Re-enable.
 - **Examples**:
   1. Mask `bluetooth` to prevent startup:
@@ -515,37 +514,5 @@
   ```bash
   for s in sshd httpd crond; do systemctl status $s >> /tmp/service_status.log; done
   ```
-
-- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "manage services"`).
-
-### Revision Quiz/Exercises
-
-- **Questions**:
-  1. How do you enable and start `httpd` in one command? (`systemctl enable --now httpd`)
-  2. What’s the difference between `restart` and `reload`? (`restart` stops/starts; `reload` updates config.)
-  3. How do you check `sshd` logs? (`journalctl -u sshd`)
-  4. Why mask a service? (Prevents starting for security/resource management.)
-- **Exercises**:
-  1. Manage `crond`:
-
-     ```bash
-     systemctl status crond
-     sudo systemctl enable --now crond
-     journalctl -u crond -n 10
-     ```
-
-  2. Troubleshoot `httpd`:
-
-     ```bash
-     systemctl is-failed httpd
-     journalctl -u httpd -b
-     sudo systemctl restart httpd
-     ```
-
-  3. Mask/unmask `bluetooth`:
-
-     ```bash
-     sudo systemctl mask bluetooth
-     systemctl status bluetooth
-     sudo systemctl unmask bluetooth
-     ```
+  
+---
