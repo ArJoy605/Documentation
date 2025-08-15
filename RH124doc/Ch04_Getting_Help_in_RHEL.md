@@ -14,14 +14,6 @@
 - **Info Pages (`info`)**:
   - More detailed, hyperlinked documentation compared to `man`.
   - Useful for GNU tools (e.g., `info coreutils`).
-- **Package Documentation**:
-  - Located in `/usr/share/doc`, includes READMEs, examples, and license files for installed packages.
-- **Red Hat Customer Portal**:
-  - Access at [access.redhat.com](https://access.redhat.com).
-  - Offers Knowledgebase articles, documentation, and support tickets for subscribed users.
-- **RHEL 9/10 Notes**:
-  - Enhanced search in `man` pages with better indexing.
-  - RHEL 10 introduces Lightspeed, an AI-driven assistant for natural language queries (e.g., `rhel lightspeed "how to use man pages"`), streamlining help access.
 
 ### Important Commands
 
@@ -108,29 +100,3 @@
 - **Ignoring `--help`**: Some commands lack `man` pages but have `--help` (e.g., `systemctl --help`).
 - **Subscription Issues**: Online Red Hat resources require an active subscription. Verify with `subscription-manager status`.
 - **Overlooking `/usr/share/doc`**: Contains valuable READMEs and examples, often missed by beginners.
-
-### Best Practices and Tips
-
-- **Start with `--help`**: Quickest way to see command usage (e.g., `grep --help`).
-- **Use `man -k` or `apropos`**: Great for discovering commands when you know the task but not the tool.
-- **Bookmark Red Hat Portal**: Keep [access.redhat.com](https://access.redhat.com) handy for official docs and Knowledgebase.
-- **Practice `vim` for Man Pages**: Since `man` uses `less` or `vim`, learn basic navigation (`/`, `n`, `q`).
-- **Organize Notes**: Save useful commands in a file (e.g., `echo "man -k: search manuals" >> ~/notes.txt`).
-- **RHEL 10 Tip**: Use Lightspeed for help (e.g., `rhel lightspeed "explain grep options"` for tailored explanations).
-- **Check Package Docs**: Always explore `/usr/share/doc` for installed software (e.g., `sudo ls /usr/share/doc/httpd`).
-
-### Revision Quiz/Notes
-
-- **Questions**:
-  - What command searches for "backup" in man pages? (`man -k backup` or `apropos backup`)
-  - How do you view the man page for `/etc/fstab`? (`man 5 fstab`)
-  - What’s the difference between `man` and `info`? (`man` is concise; `info` is detailed with hyperlinks.)
-- **Quick Exercise**:
-  - Find commands related to "network": `apropos network`.
-  - View `man nmcli`, search for "connection" (`/connection`), and note one option (e.g., `add` for adding connections).
-  - Check `bash` package docs: `ls /usr/share/doc/bash`.
-- **Self-Test**:
-  - Explain the output of `whatis cp` (one-line description of `cp`).
-  - Why use `man 5 passwd` instead of `man passwd`? (Section 5 describes file format, not the command.)
-
----

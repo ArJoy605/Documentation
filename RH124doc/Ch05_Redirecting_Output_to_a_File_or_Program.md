@@ -93,6 +93,10 @@ The `tee` command reads from stdin and writes to both stdout and one or more fil
 
 ### Example of Using `tee`
 
+In a pipeline, `tee` copies its standard input to its standard output and also redirects its standard output to the files named as arguments to the command.
+
+![tee diagram](../RH124docImages/tee_diagram.png)
+
 ```bash
 # Save directory listing to a file and filter for ".log" files
 ls -l /var/log | tee log_files.txt | grep ".log"
@@ -161,7 +165,7 @@ This cheatsheet provides a concise overview of Vim’s operating modes, basic wo
 | **Replace**       | `:%s/old/new/g`                          | Replace all occurrences of "old" with "new" |
 | **Save/Quit**     | `:w`                                     | Save file                                |
 |                   | `:q`                                     | Quit Vim                                 |
-|                   | `:wq` or `ZZ`                            | Save and quit                            |
+|                   | `:wq` or `ZZ` or `:x`                    | Save and quit                            |
 |                   | `:q!`                                    | Quit without saving                      |
 
 **Notes**:

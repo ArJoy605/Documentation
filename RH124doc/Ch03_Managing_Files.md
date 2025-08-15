@@ -62,7 +62,7 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 ### Absolute and Relative Paths
 
 - **Absolute Paths**: Start from the root (`/`) for precise location (e.g., `/etc/passwd`). Ideal for scripts or unambiguous references.
-- **Relative Paths**: Relative to the current directory (e.g., `passwd` if in `/etc`). Shorter but context-dependent.
+- **Relative Paths**: Relative to the current directory (e.g., `passwd` if already in `/etc`). Shorter but context-dependent.
 - **Special Paths**:
   - `.` : Current directory.
   - `..` : Parent directory.
@@ -74,7 +74,7 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 - Check current directory: `pwd` (e.g., `/home/user`).
 - Change directories with `cd`:
 
-  ```console
+  ```bash
   cd /var/log  # Absolute path
   cd log       # Relative path (if in /var)
   cd ..        # Parent directory
@@ -92,66 +92,68 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Listing Files**:
 
-  ```console
-  ls           # List files
-  ls -l        # Detailed (permissions, owner, size, date)
-  ls -a        # Include hidden files (e.g., .bashrc)
-  ls -lh       # Human-readable sizes (e.g., 4K)
-  ls -R        # Recursive (subdirectories)
-  ls *.txt     # Match patterns
+  ```bash
+  ls              # List files
+  ls -l           # Detailed (permissions, owner, size, date)
+  ls -a           # Include hidden files (e.g., .bashrc)
+  ls -lh          # Human-readable sizes (e.g., 4K)
+  ls -R           # Recursive (subdirectories)
+  ls *.txt        # Match patterns
+  stat file.txt   # Detailed file info with creation date (size, permissions, timestamps)
   ```
 
 - **Creating Files**:
 
-  ```console
-  touch file.txt       # Create empty file or update timestamp
+  ```bash
+  touch file.txt          # Create empty file or update timestamp
   echo "Text" > file.txt  # Create/overwrite with content
   echo "More" >> file.txt # Append content
   ```
 
 - **Creating Directories**:
 
-  ```console
-  mkdir dir            # Create directory
-  mkdir -p parent/child  # Create nested directories
+  ```bash
+  mkdir dir               # Create directory
+  mkdir -p parent/child   # Create nested directories
   ```
 
 - **Copying Files/Directories**:
 
-  ```console
-  cp file.txt copy.txt   # Copy file
-  cp -r dir dir_copy     # Copy directory recursively
-  cp -i *.txt /backup    # Prompt before overwrite
+  ```bash
+  cp file.txt copy.txt      # Copy file
+  cp -r dir dir_copy        # Copy directory recursively
+  cp -i *.txt /backup       # Prompt before overwrite
+  cp -v file.txt /backup/   # Verbose output
   ```
 
 - **Moving/Renaming Files/Directories**:
 
-  ```console
-  mv file.txt new.txt    # Rename
-  mv file.txt /new/dir   # Move
-  mv -i dir /new/location  # Prompt before overwrite
+  ```bash
+  mv file.txt new.txt       # Rename
+  mv file.txt /new/dir      # Move
+  mv -i dir /new/location   # Prompt before overwrite
   ```
 
 - **Deleting Files/Directories**:
 
-  ```console
+  ```bash
   rm file.txt            # Delete file
   rm -r dir              # Delete directory recursively
   rm -i *.txt            # Prompt before deleting
   rm -f file.txt         # Force delete (no prompt)
+  rm -rf dir             # Force delete directory and contents
   rmdir empty_dir        # Remove empty directory
   ```
 
 - **Viewing File Types**:
 
-  ```console
+  ```bash
   file file.txt          # Identify type (e.g., ASCII text)
-  ls -l                  # First column: - (file), d (directory), l (link)
   ```
 
 - **Finding Files** (Basic):
 
-  ```console
+  ```bash
   find /home -name "*.txt"  # Find by name
   find / -type d -name "log"  # Find directories
   ```
@@ -174,15 +176,16 @@ Links create multiple references to files or directories, used for redundancy or
 
 ### Creating Hard Links
 
-```console
+```bash
 ln /path/to/file.txt hardlink.txt
 ```
 
 - Check: `ls -li` shows identical inode numbers.
+- Data only be deleted when all hard links are removed.
 
 ### Creating Soft Links
 
-```console
+```bash
 ln -s /path/to/file.txt softlink.txt
 ```
 
@@ -222,31 +225,38 @@ Extended globbing (enable: `shopt -s extglob`): `?(pat)` (0/1), `*(pat)` (0+), `
 
 ### Using Wildcards in Commands
 
-```console
+```bash
 rm *.bak  # Delete .bak files
 cp file[1-3].txt /backup  # Copy specific files
 ```
 
 ### Using Tilde Expansion
 
-```console
+```bash
 cd ~         # Home directory
 ls ~user/docs  # Another user's docs
 ```
 
 ### Using Brace Expansion
 
-```console
+```bash
 touch file{1..3}.txt  # file1.txt file2.txt file3.txt
 mkdir {a,b,c}/sub     # a/sub b/sub c/sub
 touch file{A,B}{1,2}.txt  # fileA1.txt fileA2.txt fileB1.txt fileB2.txt
+```
+
+### Using Command Substitution
+
+```bash
+echo "Today is $(date +%Y-%m-%d)"  # Outputs current date
+echo "Files: $(ls *.txt)"  # Lists all .txt files
 ```
 
 ## Practical Examples
 
 - **Scenario: Backup Configs**:
 
-  ```console
+  ```bash
   mkdir ~/backup
   cp /etc/*.conf ~/backup
   ln -s ~/backup /etc_backup
@@ -254,19 +264,19 @@ touch file{A,B}{1,2}.txt  # fileA1.txt fileA2.txt fileB1.txt fileB2.txt
 
 - **Scenario: Batch Create**:
 
-  ```console
+  ```bash
   touch log{2025-01..2025-12}.txt
   ```
   
 - **Scenario: Clean Temp**:
 
-  ```console
+  ```bash
   rm -r /tmp/*
   ```
 
 - **Daily Use: Rename Batch**:
 
-  ```console
+  ```bash
   for f in *.txt; do mv "$f" "${f%.txt}.bak"; done
   ```
 
