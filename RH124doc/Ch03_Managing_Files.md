@@ -7,12 +7,13 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 ```plaintext
 / (root)
 ├── bin/        # Essential user binaries (ls, cp)
-├── sbin/       # System admin binaries (fdisk, reboot)
 ├── boot/       # Boot loader and kernel files
 ├── dev/        # Device files (sda, null)
 ├── etc/        # Configuration files (passwd, fstab)
 ├── home/       # User home directories
 │   └── user1/  # Example user directory
+│   └── user2/  # Another user directory
+│   └── user3/  # Yet another user directory
 ├── lib/        # Shared libraries
 ├── lib64/      # 64-bit libraries
 ├── media/      # Mount points for removable media
@@ -21,14 +22,17 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 ├── proc/       # Virtual process/kernel info
 ├── root/       # Root user’s home
 ├── run/        # Runtime data (PIDs, sockets)
+├── sbin/       # System binaries (fdisk, reboot)
 ├── sys/        # Virtual hardware/kernel settings
 ├── tmp/        # Temporary files
 ├── usr/        # User programs and data
 │   ├── bin/    # Non-essential binaries
 │   └── share/  # Documentation, man pages
+│   └── sbin/   # Non-essential system binaries
+│   └── tmp/    # Temporary files for users
 └── var/        # Variable data
     ├── log/    # Log files (messages)
-    └── tmp/    # Persistent temporary files
+    └── tmp/    # Persistent temporary files  
 ```
 
 ## Important Red Hat Directories Table
@@ -70,7 +74,7 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 - Check current directory: `pwd` (e.g., `/home/user`).
 - Change directories with `cd`:
 
-  ```bash
+  ```console
   cd /var/log  # Absolute path
   cd log       # Relative path (if in /var)
   cd ..        # Parent directory
@@ -88,7 +92,7 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Listing Files**:
 
-  ```bash
+  ```console
   ls           # List files
   ls -l        # Detailed (permissions, owner, size, date)
   ls -a        # Include hidden files (e.g., .bashrc)
@@ -99,7 +103,7 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Creating Files**:
 
-  ```bash
+  ```console
   touch file.txt       # Create empty file or update timestamp
   echo "Text" > file.txt  # Create/overwrite with content
   echo "More" >> file.txt # Append content
@@ -107,14 +111,14 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Creating Directories**:
 
-  ```bash
+  ```console
   mkdir dir            # Create directory
   mkdir -p parent/child  # Create nested directories
   ```
 
 - **Copying Files/Directories**:
 
-  ```bash
+  ```console
   cp file.txt copy.txt   # Copy file
   cp -r dir dir_copy     # Copy directory recursively
   cp -i *.txt /backup    # Prompt before overwrite
@@ -122,7 +126,7 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Moving/Renaming Files/Directories**:
 
-  ```bash
+  ```console
   mv file.txt new.txt    # Rename
   mv file.txt /new/dir   # Move
   mv -i dir /new/location  # Prompt before overwrite
@@ -130,7 +134,7 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Deleting Files/Directories**:
 
-  ```bash
+  ```console
   rm file.txt            # Delete file
   rm -r dir              # Delete directory recursively
   rm -i *.txt            # Prompt before deleting
@@ -140,14 +144,14 @@ Core commands for creating, copying, moving, deleting, and inspecting files/dire
 
 - **Viewing File Types**:
 
-  ```bash
+  ```console
   file file.txt          # Identify type (e.g., ASCII text)
   ls -l                  # First column: - (file), d (directory), l (link)
   ```
 
 - **Finding Files** (Basic):
 
-  ```bash
+  ```console
   find /home -name "*.txt"  # Find by name
   find / -type d -name "log"  # Find directories
   ```
@@ -170,7 +174,7 @@ Links create multiple references to files or directories, used for redundancy or
 
 ### Creating Hard Links
 
-```bash
+```console
 ln /path/to/file.txt hardlink.txt
 ```
 
@@ -178,7 +182,7 @@ ln /path/to/file.txt hardlink.txt
 
 ### Creating Soft Links
 
-```bash
+```console
 ln -s /path/to/file.txt softlink.txt
 ```
 
@@ -218,21 +222,21 @@ Extended globbing (enable: `shopt -s extglob`): `?(pat)` (0/1), `*(pat)` (0+), `
 
 ### Using Wildcards in Commands
 
-```bash
+```console
 rm *.bak  # Delete .bak files
 cp file[1-3].txt /backup  # Copy specific files
 ```
 
 ### Using Tilde Expansion
 
-```bash
+```console
 cd ~         # Home directory
 ls ~user/docs  # Another user's docs
 ```
 
 ### Using Brace Expansion
 
-```bash
+```console
 touch file{1..3}.txt  # file1.txt file2.txt file3.txt
 mkdir {a,b,c}/sub     # a/sub b/sub c/sub
 touch file{A,B}{1,2}.txt  # fileA1.txt fileA2.txt fileB1.txt fileB2.txt
@@ -242,7 +246,7 @@ touch file{A,B}{1,2}.txt  # fileA1.txt fileA2.txt fileB1.txt fileB2.txt
 
 - **Scenario: Backup Configs**:
 
-  ```bash
+  ```console
   mkdir ~/backup
   cp /etc/*.conf ~/backup
   ln -s ~/backup /etc_backup
@@ -250,19 +254,19 @@ touch file{A,B}{1,2}.txt  # fileA1.txt fileA2.txt fileB1.txt fileB2.txt
 
 - **Scenario: Batch Create**:
 
-  ```bash
+  ```console
   touch log{2025-01..2025-12}.txt
   ```
   
 - **Scenario: Clean Temp**:
 
-  ```bash
+  ```console
   rm -r /tmp/*
   ```
 
 - **Daily Use: Rename Batch**:
 
-  ```bash
+  ```console
   for f in *.txt; do mv "$f" "${f%.txt}.bak"; done
   ```
 
