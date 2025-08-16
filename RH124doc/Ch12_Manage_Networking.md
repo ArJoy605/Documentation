@@ -88,7 +88,8 @@
   2. Check routing table:
 
      ```bash
-     ip route show
+     ip route show # Show routing table
+     ip route get  # Show routing table
      ```
 
      Output: Shows `default via 192.168.1.1`.
@@ -142,7 +143,36 @@
   - Common for LANs: `/64`, larger for ISPs: `/48`.
 - **IPv6 Address Configuration**:
   - Static or dynamic (SLAAC, DHCPv6).
-- **Examples**:
+  Here’s a clean **note on IPv6 address writing conventions** based on your text:
+
+---
+
+### IPv6 Address Notation Rules 📝
+
+1. **Leading zeros** → Suppress them in each group.
+
+   - Example: `2001:0db8:0001::1` → `2001:db8:1::1`
+
+2. **Zero compression (::)** → Use `::` to replace the **longest** consecutive sequence of all-zeros groups.
+
+   - Example: `2001:db8:0:0:0:0:0:1` → `2001:db8::1`
+
+3. **Tie-breaking rule** → If multiple zero sequences are equal in length, shorten the **leftmost** one with `::`.
+
+   - Example: `2001:0:0:1:0:0:0:1` → `2001::1:0:0:1`
+
+4. **Single zero group** → Do **not** shorten with `::`.
+
+   - Instead use `:0:`
+   - Example: `2001:db8:0:1::1` (✔ good) vs `2001:db8::1:1` (✘ avoid for single group)
+
+5. **Hex case** → Always use **lowercase letters** `a–f`.
+
+   - Example: `2001:db8::dead:beef`
+
+---
+
+- **Example Commands**:
   1. View IPv6 addresses:
 
      ```bash
@@ -711,49 +741,3 @@
   ```bash
   sudo restorecon -R /etc/NetworkManager
   ```
-
-### Best Practices
-
-- **Use `nmcli`**: Avoid manual file edits to prevent conflicts.
-- **Verify Changes**: Check with `ip addr`, `ping`, `nmcli con show`.
-- **Backup Configs**:
-
-  ```bash
-  sudo cp -r /etc/NetworkManager/system-connections /backup/network-$(date +%F)
-  ```
-
-- **Secure Firewall**: Only open necessary services.
-- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "configure network"`).
-- **Automate Checks**:
-
-  ```bash
-  nmcli > network_status.log
-  ip addr >> network_status.log
-  ```
-
-### Revision Quiz/Exercises
-
-- **Questions**:
-  1. How do you set a static IP with `nmcli`? (`nmcli con mod ... ipv4.addresses`)
-  2. What command checks open ports? (`ss -tuln`)
-  3. How do you set the hostname? (`hostnamectl set-hostname`)
-- **Exercises**:
-  1. Add static IP connection:
-
-     ```bash
-     sudo nmcli con add type ethernet ifname enp0s3 con-name my-static ipv4.addresses 192.168.1.200/24 ipv4.gateway 192.168.1.1 ipv4.dns 8.8.8.8 ipv4.method manual
-     sudo nmcli con up my-static
-     ```
-
-  2. Troubleshoot DNS:
-
-     ```bash
-     dig google.com
-     sudo nmcli con mod my-static ipv4.dns 8.8.8.8
-     ```
-
-  3. Check traffic:
-
-     ```bash
-     sudo nload enp0s3
-     ```

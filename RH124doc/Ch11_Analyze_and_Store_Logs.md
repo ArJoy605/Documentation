@@ -7,12 +7,9 @@
   - Managed by `rsyslog` (traditional logs) and `systemd-journald` (journal logs) in RHEL.
 - **System Log Architecture**:
   - **rsyslog**: Writes logs to text files (e.g., `/var/log/messages`, `/var/log/secure`).
-  - **systemd-journald**: Stores logs in binary format, accessible via `journalctl`.
+  - **systemd-journald**: It is the core logging service that collects messages from the kernel, boot process, daemons, and syslog, then stores them in a structured, indexed journal. By default, the logs are not persistent across reboots.
   - **logrotate**: Manages log file size and rotation to prevent disk space issues.
   - Logs can be stored in memory, on disk, or forwarded to remote servers.
-- **RHEL 9/10 Notes**:
-  - RHEL 10 improves `journald` querying and integrates with RHEL Lightspeed (e.g., `rhel lightspeed "find SSH errors"` suggests `journalctl -u sshd | grep Failed`).
-  - Enhanced `chronyd` for precise time synchronization, critical for log accuracy.
 
 ### Describing the System Log Architecture
 
@@ -281,28 +278,36 @@
   1. View all logs since boot:
 
      ```bash
-     journalctl -b
+     journalctl -b #logs from current boot
+     journalctl -b -1 #logs from previous boot
+     journalctl -o verbose #detailed output
      ```
 
-  2. Filter SSH logs:
+  2. Since-Until log:
+
+       ```bash
+       journalctl --since "2025-08-14 09:00" --until "2025-08-14 10:00"
+       ```
+
+  3. Filter SSH logs:
 
      ```bash
      journalctl -u sshd | grep Failed
      ```
 
-  3. Show errors only:
+  4. Show errors only:
 
      ```bash
      journalctl -p 3
      ```
 
-  4. View logs for a time range:
+  5. View logs for a time range:
 
      ```bash
      journalctl --since "2025-08-14 09:00" --until "2025-08-14 10:00"
      ```
 
-  5. Corner Case: No logs shown:
+  6. Corner Case: No logs shown:
 
      ```bash
      # Check journald: systemctl status systemd-journald
@@ -449,11 +454,17 @@
      sudo timedatectl set-timezone America/New_York
      ```
 
-  3. Corner Case: Incorrect time:
+  3. Synchronize time with NTP:
 
-     ```bash
-     sudo chronyc makestep  # Force sync with NTP
-     ```
+       ```bash
+       sudo systemctl restart chronyd
+       ```
+
+  4. Force time sync:
+
+       ```bash
+       sudo chronyc makestep
+       ```
 
 ### Setting Local Clocks and Time Zones
 
@@ -464,10 +475,10 @@
   1. View time status:
 
      ```bash
-     timedatectl
+     timedatectl                        #Shows time, time zone, NTP status.
+     timedatectl list-timezones         #List all time zones.
      ```
 
-     Output: Shows time, time zone, NTP status.
   2. Set time zone:
 
      ```bash
@@ -595,57 +606,5 @@
   ```bash
   sudo logrotate -d /etc/logrotate.conf  # Debug
   ```
-
-- **Time Sync Issues**: Logs have wrong timestamps if `chronyd` fails:
-
-  ```bash
-  chronyc tracking
-  ```
-
-- **Journal Size**: Large journals fill disk:
-
-  ```bash
-  sudo journalctl --vacuum-size=500M
-  ```
-
-### Best Practices
-
-- **Enable Persistent Journals**: Set `Storage=persistent` in `/etc/systemd/journald.conf`.
-- **Use Specific Filters**: `journalctl -u`, `-p`, `--since` for targeted analysis.
-- **Automate Log Checks**:
-
-  ```bash
-  journalctl -p 3 -b > /tmp/errors.log
-  ```
-
-- **Configure Logrotate**: Use `weekly`, `rotate 4`, `compress` for efficiency.
-- **Sync Time**: Ensure `chronyd` is active (`systemctl enable chronyd`).
-- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "analyze logs"`).
-
-### Revision Quiz/Exercises
-
-- **Questions**:
-  1. How do you view `httpd` logs since yesterday? (`journalctl -u httpd --since "yesterday"`)
-  2. What command rotates logs manually? (`logrotate -f /etc/logrotate.conf`)
-  3. How do you set the time zone to Tokyo? (`timedatectl set-timezone Asia/Tokyo`)
-- **Exercises**:
-  1. Monitor SSH logs:
-
-     ```bash
-     journalctl -u sshd -f
-     ```
-
-  2. Configure custom log rotation:
-
-     ```bash
-     sudo vim /etc/logrotate.d/test
-     # Add: /var/log/test.log { daily, rotate 3 }
-     sudo logrotate -v /etc/logrotate.d/test
-     ```
-
-  3. Sync time:
-
-     ```bash
-     sudo timedatectl set-timezone UTC
-     sudo chronyc makestep
-     ```
+  
+  ---

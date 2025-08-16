@@ -511,7 +511,7 @@
 - **Test Safely**: Keep a console session open when modifying SSH.
 - **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "secure SSH server"`).
 
-### Revision Quiz/Exercises
+### Revision
 
 - **Questions**:
   1. How do you copy an SSH key to a server? (`ssh-copy-id user1@server`)
@@ -534,12 +534,4 @@
      # Set: PermitRootLogin no
      # Set: PasswordAuthentication no
      sudo systemctl reload sshd
-     ```
-
-  3. Troubleshoot connection:
-
-     ```bash
-     journalctl -u sshd -n 20
-     sudo firewall-cmd --list-all
-     sudo systemctl status sshd
      ```

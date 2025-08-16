@@ -16,9 +16,6 @@
 - **Key Files and Directories**:
   - Archives: Stored in user-defined locations (e.g., `/backup`) or temporary directories (`/tmp`).
   - SSH configuration: Relies on `sshd` for `scp` and `sftp` (port 22, `/etc/ssh/sshd_config`).
-- **RHEL 9/10 Notes**:
-  - RHEL 10 enhances `rsync` performance for large datasets and improves `tar` parallel processing.
-  - RHEL Lightspeed suggests commands (e.g., `rhel lightspeed "create backup archive"` suggests `tar -czvf`).
 
 ### Managing Compressed Tar Archives
 
@@ -482,24 +479,7 @@
   rsync -av --dry-run --delete /source user@remote:/dest  # Test first
   ```
 
-### Best Practices
-
-- **Choose Compression Wisely**: Use `xz` (`-J`) for best compression, `gzip` (`-z`) for speed.
-- **Verify Archives**: Check with `tar -tvf` before transfer/extraction.
-- **Use `rsync` for Efficiency**: Incremental sync saves time/bandwidth.
-- **Secure Transfers**: Always use `scp`/`sftp`/`rsync` over SSH.
-- **Automate Backups**:
-
-  ```bash
-  # backup.sh
-  tar -czvf /backup/home_$(date +%F).tar.gz /home
-  rsync -avz /backup/home_$(date +%F).tar.gz user1@remote:/backup
-  ```
-
-- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "sync files"` suggests `rsync -avz`).
-- **Check Disk Space**: `df -h` before archiving/transferring.
-
-### Revision Quiz/Exercises
+### Revision
 
 - **Questions**:
   1. What creates a `bzip2` archive? (`tar -cjvf archive.tar.bz2 files`)
