@@ -18,9 +18,6 @@
 - **AppStream Modules**:
   - Provide multiple versions of software (e.g., Node.js 18, 20).
   - Organized as modules, streams, and profiles.
-- **RHEL 9/10 Notes**:
-  - RHEL 10 improves DNF performance and AppStream modularity.
-  - RHEL Lightspeed suggests commands (e.g., `rhel lightspeed "install web server"` suggests `dnf install httpd`).
 
 ### Registering Systems for Red Hat Support
 
@@ -140,6 +137,7 @@
 ### Explaining and Investigating RPM Software Packages
 
 - **RPM**: Red Hat Package Manager, handles `.rpm` files directly.
+   ![RPM Package Structure](../RH124docImages/rpm_package.png)
 - **Purpose**: Query or install packages without dependency resolution.
 - **Examples**:
   1. Query installed package:
@@ -563,49 +561,3 @@
   ```bash
   dnf module reset nodejs
   ```
-
-### Best Practices
-
-- **Use DNF**: Prefer `dnf` over `rpm` for dependency resolution.
-- **Keep Subscriptions Active**: Regularly check: `subscription-manager status`.
-- **Update Regularly**: Run `dnf update --security` weekly.
-- **Use Modules for Flexibility**: Install specific streams (e.g., `nodejs:18`).
-- **Automate Updates**:
-
-  ```bash
-  # /etc/cron.weekly/security-update.sh
-  #!/bin/bash
-  dnf update --security -y
-  ```
-
-- **RHEL 10**: Use Lightspeed (e.g., `rhel lightspeed "install python"` suggests `dnf module install python39`).
-- **Clean Up**: Remove unneeded packages: `dnf autoremove`.
-
-### Revision Quiz/Exercises
-
-- **Questions**:
-  1. How do you enable a repository? (`subscription-manager repos --enable <repo>`)
-  2. What command installs a package group? (`dnf groupinstall "Group Name"`)
-  3. How do you switch Node.js streams? (`dnf module reset nodejs; dnf module install nodejs:20`)
-- **Exercises**:
-  1. Register and install `nginx`:
-
-     ```bash
-     sudo subscription-manager register --username <user> --password <pass>
-     sudo dnf install -y nginx
-     sudo systemctl enable --now nginx
-     ```
-
-  2. Install Python 3.9 module:
-
-     ```bash
-     sudo dnf module install python39
-     python3.9 --version
-     ```
-
-  3. Query and remove `tree`:
-
-     ```bash
-     rpm -qa | grep tree
-     sudo dnf remove tree
-     ```
