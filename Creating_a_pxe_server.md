@@ -9,15 +9,16 @@ This guide sets up a PXE server on Oracle Linux 8 for unattended client installa
 - OS: Oracle Linux 8 (minimal, no GUI)
 - RAM: 2–4 GB, CPU: 2 vCPU
 - Disk: 40 GB
-- Storage: Attach Oracle Linux 8 ISO (e.g., `/root/OracleLinux-R8-U8-x86_64-dvd.iso`)
+- Storage: Attach Oracle Linux 8 ISO (e.g., `/YourAbsolutePath/OracleLinux-R8-U8-x86_64-dvd.iso`)
 - Network:
   - Adapter 1: NAT (optional, for internet)
   - Adapter 2: Host-only (vboxnet0, static IP `192.168.56.10/24`)
+    - Modify with nmcli or `nmtui` to set static IP.
 
 **Client VM**:
 
 - No OS (PXE boot only)
-- RAM: 4 GB, Disk: 20 GB
+- RAM: minimum 4 GB, Disk: 20 GB //4 GB is sufficient for testing, 2GB may cause issues
 - Network: Adapter 1: Host-only (vboxnet0)
 - Boot order: Network first
 
@@ -54,6 +55,7 @@ dnf install -y dhcp-server tftp-server syslinux syslinux-tftpboot httpd
 - `tftp-server`: Serves PXE boot files.
 - `syslinux-tftpboot`: Provides PXE bootloader modules (`pxelinux.0`, `ldlinux.c32`, etc.).
 - `httpd`: Serves the Oracle Linux ISO and Kickstart file.
+- `syslinux`: Provides .c32 files for PXE booting.
 
 ## 4 Configure DHCP (Host-only Network)
 
@@ -86,7 +88,7 @@ Enable and start DHCP:
 
 ```bash
 systemctl enable --now dhcpd
-journalctl -xeu dhcpd --no-pager | tail -n 50
+journalctl -xeu dhcpd --no-pager | tail -n 50 # Check for errors if no error then continue
 ```
 
 Verify DHCP is running and bound to `192.168.56.10`.
@@ -121,14 +123,16 @@ mount -o loop /YOURPATH/OracleLinux-R8-U8-x86_64-dvd.iso /mnt/ol8iso
 mount --bind /mnt/ol8iso /var/www/html/ol8
 
 # Add to /etc/fstab for persistence
-echo "/root/OracleLinux-R8-U8-x86_64-dvd.iso /mnt/ol8iso iso9660 loop,ro 0 0" >> /etc/fstab
+echo "/YourAbsolutePath/OracleLinux-R8-U8-x86_64-dvd.iso /mnt/ol8iso iso9660 loop,ro 0 0" >> /etc/fstab
 echo "/mnt/ol8iso /var/www/html/ol8 none bind 0 0" >> /etc/fstab
+
+#YOU CAN ALSO JUST USE VIM TO EDIT /etc/fstab
 
 # Verify fstab entries
 cat /etc/fstab
 
 # Test mounts
-umount /var/www/html/ol8
+umount /var/www/html/ol8 # this is umount not unmount
 umount /mnt/ol8iso
 mount -a
 ls /var/www/html/ol8  # Should list ISO contents (e.g., BaseOS, AppStream)
@@ -141,7 +145,7 @@ systemctl enable --now httpd
 curl http://192.168.56.10/ol8/  # Test access
 ```
 
-**Note**: Replace `/root/OracleLinux-R8-U8-x86_64-dvd.iso` with the actual path to your ISO.
+**Note**: Replace `/YourAbsolutePath/OracleLinux-R8-U8-x86_64-dvd.iso` with the actual path to your ISO.
 
 ## 7 Extract PXE Boot Kernel & Initrd
 
@@ -154,7 +158,7 @@ cp /mnt/ol8iso/images/pxeboot/initrd.img /var/lib/tftpboot/
 
 ## 8 Kickstart File (Unattended Install)
 
-Create `/var/www/html/ks.cfg` for unattended GUI install with SELinux disabled:
+Create `/var/www/html/ks.cfg` for unattended GUI install with SELinux disabled and this edit can be done also using `vim` or `nano`:
 
 ```bash
 cat >/var/www/html/ks.cfg <<'EOF'
@@ -194,7 +198,7 @@ curl http://192.168.56.10/ks.cfg
 
 ## 9 PXE Boot Menu
 
-Create `/var/lib/tftpboot/pxelinux.cfg/default`:
+Create `/var/lib/tftpboot/pxelinux.cfg/default` and it can also be done using `vim` or `nano`:
 
 ```bash
 cat >/var/lib/tftpboot/pxelinux.cfg/default <<'EOF'
@@ -217,7 +221,7 @@ EOF
 1. Power on the client VM.
 2. Client should:
    - Receive DHCP IP from `192.168.56.100–200`.
-   - Download `pxelinux.0`, `ldlinux.c32`, and display the PXE menu.
+   - Download `pxelinux.0`, `ldlinux.c32`, `menu.c32` and display the PXE menu.
    - Auto-boot after 5 seconds, load `vmlinuz` and `initrd.img`.
    - Fetch Kickstart via HTTP and perform unattended Oracle Linux 8 GUI install.
 3. Post-install login:
@@ -250,7 +254,7 @@ curl http://192.168.56.10/ol8/
 
 ## Notes
 
-- **ISO Path**: Ensure the ISO path (`/root/OracleLinux-R8-U8-x86_64-dvd.iso`) is correct and persistent across reboots.
+- **ISO Path**: Ensure the ISO path (`/YourAbsolutePath/OracleLinux-R8-U8-x86_64-dvd.iso`) is correct and persistent across reboots.
 - **NIC Name**: Replace `enp0s8` with the actual host-only NIC name from `ip a`.
 - **SELinux/Firewalld**: Disabled on the server (Step 2) and client (Kickstart).
 - **Persistence**: `/etc/fstab` entries ensure ISO and bind mounts persist across reboots.
