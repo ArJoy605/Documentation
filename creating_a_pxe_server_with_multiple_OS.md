@@ -6,7 +6,6 @@ To support multiple operating systems (OSes) on your PXE server for unattended c
 
 Please ensure you have used the original PXE server setup guide to create a working PXE server with Oracle Linux 8. This guide builds upon that setup.
 
-
 ### Overview of Changes
 
 1. **Mount Additional ISOs**: Mount each additional OS ISO and serve it via HTTP, with persistent `/etc/fstab` entries.
@@ -111,6 +110,72 @@ user --name=oluser --groups=wheel --password=oracle123 --plaintext
 @^Server with GUI
 %end
 EOF
+```
+
+For Rocky Linux 10, create `/var/www/html/ks-rocky10.cfg`:
+
+```bash
+#version=RHEL10
+# Rocky Linux 10 Kickstart for PXE with GUI
+
+# Use local PXE repo (BaseOS + AppStream)
+url --url="http://192.168.56.11/rocky10"
+repo --name=AppStream --baseurl=http://192.168.56.11/rocky10/AppStream
+
+# Language/keyboard
+lang en_US.UTF-8
+keyboard us
+
+# Network config
+network --bootproto=dhcp --device=link --activate --hostname=rocky10.localdomain
+
+# Timezone
+timezone Asia/Dhaka --utc
+
+# Bootloader
+bootloader --location=mbr --boot-drive=sda
+
+# Partitioning (EFI + LVM)
+zerombr
+clearpart --all --initlabel
+part /boot/efi --fstype=efi --size=600
+part /boot     --fstype=xfs --size=1024
+part pv.01     --grow --size=1
+volgroup rhel pv.01
+logvol /       --vgname=rhel --name=root --fstype=xfs --size=10240 --grow
+logvol swap    --vgname=rhel --name=swap --fstype=swap --size=2048
+
+# Root password disabled, sudo user instead
+rootpw --lock
+user --name=joy --groups=wheel --plaintext --password=joy123098
+
+# Enable GUI installer
+graphical
+firstboot --enable
+
+# SELinux and Firewall
+selinux --disabled
+firewall --disabled
+
+# Services
+services --enabled=sshd,chronyd,NetworkManager
+
+# Packages
+%packages
+@^minimal-environment
+@standard
+@guest-agents
+kernel-devel
+%end
+
+# Post-install tasks
+%post
+dnf config-manager --set-enabled crb
+%end
+
+# Reboot after installation
+reboot
+
 ```
 
 **Notes**:
@@ -220,33 +285,6 @@ curl http://192.168.56.10/ol9/
 
 6. Post-install, verify login credentials (e.g., `root/oracle123`, `oluser/oracle123`).
 
-#### Step 8: Addressing the `syslinux` Issue
-
-Your original query indicated that `/usr/share/syslinux` and `/usr/lib/syslinux` were not found, despite `syslinux-tftpboot` being installed. To ensure the PXE boot files are available, verify their location:
-
-```bash
-find /usr -name pxelinux.0
-```
-
-If not found, reinstall `syslinux-tftpboot` and `syslinux`:
-
-```bash
-dnf reinstall -y syslinux syslinux-tftpboot
-find /usr -name pxelinux.0
-```
-
-If still missing, manually download the files:
-
-```bash
-mkdir -p /var/lib/tftpboot
-curl -o /var/lib/tftpboot/pxelinux.0 http://www.kernel.org/pub/linux/utils/boot/syslinux/6.04/pxelinux.0
-curl -o /var/lib/tftpboot/ldlinux.c32 http://www.kernel.org/pub/linux/utils/boot/syslinux/6.04/ldlinux.c32
-curl -o /var/lib/tftpboot/menu.c32 http://www.kernel.org/pub/linux/utils/boot/syslinux/6.04メニュー.c32
-curl -o /var/lib/tftpboot/vesamenu.c32 http://www.kernel.org/pub/linux/utils/boot/syslinux/6.04/vesamenu.c32
-curl -o /var/lib/tftpboot/libutil.c32 http://www.kernel.org/pub/linux/utils/boot/syslinux/6.04/libutil.c32
-chmod 644 /var/lib/tftpboot/*
-```
-
 ### Updated PXE Boot Menu Example
 
 Here’s an example `/var/lib/tftpboot/pxelinux.cfg/default` for Oracle Linux 8, Oracle Linux 9, and a hypothetical CentOS Stream 9:
@@ -284,13 +322,3 @@ label install-centos9
 - **Client RAM**: Some OSes (e.g., Oracle Linux 9) may require more RAM (4 GB recommended) for GUI installation.
 - **TFTP Load**: Serving multiple kernel and initrd files increases TFTP load; ensure the server’s performance is adequate.
 - **Menu Customization**: Enhance the PXE menu with `menu.c32` or `vesamenu.c32` for better visuals or add submenus for organization if supporting many OSes.
-
-### If Issues Persist
-
-If you encounter issues (e.g., missing `pxelinux.0` or boot failures), share:
-
-- Output of `find /usr -name pxelinux.0` and `rpm -ql syslinux-tftpboot`.
-- Logs from `journalctl -u dhcpd -f`, `journalctl -u tftp.socket -f`, or `journalctl -u httpd -f`.
-- Any client boot error messages.
-
-This setup should allow your PXE server to offer multiple OSes for client installation. Let me know if you need help with specific OSes or further troubleshooting!
