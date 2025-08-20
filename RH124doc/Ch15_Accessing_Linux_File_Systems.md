@@ -12,6 +12,7 @@
   - Devices: Represented as block devices (e.g., `/dev/sda1`).
   - Partitions: Subdivisions of disks (e.g., `/dev/sda1`, `/dev/sda2`).
   - Logical Volumes: Managed by LVM for flexible storage.
+    ![Different Storage Types](../RH124docImages/different_device_types.png)
 - **Key Files**:
   - `/etc/fstab`: Defines permanent mounts (format: `device mount_point filesystem_type options dump pass`).
   - `/proc/mounts`: Lists active mounts.
