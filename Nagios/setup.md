@@ -278,39 +278,6 @@ define service {
 
 ```
 
-```cfg
-# CPU usage via SNMPv3
-define service {
-    use                     generic-service
-    host_name               nms-host01
-    service_description     CPU Usage
-    check_command           check_snmp!-v 3 -l authPriv -u nagios -a SHA -A "AuthPassword123" -x AES -X "PrivPassword123" -o .1.3.6.1.4.1.2021.11.11.0 -w 70 -c 90
-}
-
-# Memory usage via SNMPv3
-define service {
-    use                     generic-service
-    host_name               nms-host01
-    service_description     Memory Usage
-    check_command           check_snmp!-v 3 -l authPriv -u nagios -a SHA -A "AuthPassword123" -x AES -X "PrivPassword123" -o .1.3.6.1.4.1.2021.4.6.0 -w 70 -c 90
-}
-
-# Repeat for nms-host02
-define service {
-    use                     generic-service
-    host_name               nms-host02
-    service_description     CPU Usage
-    check_command           check_snmp!-v 3 -l authPriv -u nagios -a SHA -A "AuthPassword123" -x AES -X "PrivPassword123" -o .1.3.6.1.4.1.2021.11.11.0 -w 70 -c 90
-}
-
-define service {
-    use                     generic-service
-    host_name               nms-host02
-    service_description     Memory Usage
-    check_command           check_snmp!-v 3 -l authPriv -u nagios -a SHA -A "AuthPassword123" -x AES -X "PrivPassword123" -o .1.3.6.1.4.1.2021.4.6.0 -w 70 -c 90
-}
-```
-
 ---
 
 ## **Step 7: Now we have to add commands so, add the following to /etc/nagios/objects/commands.cfg**
