@@ -33,6 +33,10 @@ sudo ./VMware-Workstation-Full-17.6.1-24319023.x86_64.bundle
 sudo openssl req -new -x509 -newkey rsa:2048 -keyout ~/MOK.priv -outform DER -out ~/MOK.der -nodes -days 36500 -subj "/CN=VMware/"
 ```
 
+### 🔎 Notes
+
+* You can change the path `~/MOK.priv` and `~/MOK.der` if needed.
+
 1. **Register the public key:**
 
 ```bash
@@ -53,8 +57,9 @@ sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ~/MOK.priv ~/MO
 sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ~/MOK.priv ~/MOK.der $(modinfo -n vmnet)
 ```
 
-### 🔎 Notes
+### 🔎 Note
 
+* You have to change the path `~/MOK.priv` and `~/MOK.der` if you have generated them in a different location.
 * `$(modinfo -n vmmon)` → automatically gives the full path to `vmmon.ko`
 * `$(modinfo -n vmnet)` → automatically gives the full path to `vmnet.ko`
 * `uname -r` → expands to your **current running kernel version**
@@ -76,6 +81,10 @@ sudo ./VMware-Workstation-Full-*.bundle
 sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ~/MOK.priv ~/MOK.der $(modinfo -n vmmon)
 sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ~/MOK.priv ~/MOK.der $(modinfo -n vmnet)
 ```
+
+### 🔎Note
+
+* You have to change the path `~/MOK.priv` and `~/MOK.der` if you have generated them in a different location.
 
 ---
 
