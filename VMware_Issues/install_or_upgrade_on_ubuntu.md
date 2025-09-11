@@ -35,6 +35,7 @@ sudo openssl req -new -x509 -newkey rsa:2048 -keyout ~/MOK.priv -outform DER -ou
 
 ### 🔎 Notes
 
+* Choose a password.
 * You can change the path `~/MOK.priv` and `~/MOK.der` if needed.
 
 1. **Register the public key:**
@@ -43,7 +44,6 @@ sudo openssl req -new -x509 -newkey rsa:2048 -keyout ~/MOK.priv -outform DER -ou
 sudo mokutil --import ~/MOK.der
 ```
 
-* Choose a password.
 * Reboot → In UEFI menu, **enroll the key**.
 
 ---
