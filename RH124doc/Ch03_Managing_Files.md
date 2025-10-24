@@ -12,7 +12,7 @@ The Filesystem Hierarchy Standard (FHS) defines the directory structure and cont
 ├── etc/        # Configuration files (passwd, fstab)
 ├── home/       # User home directories
 │   └── user1/  # Example user directory
-│   └── user2/  # Another user directory
+│   └── user2/  # Another user directoryF
 │   └── user3/  # Yet another user directory
 ├── lib/        # Shared libraries
 ├── lib64/      # 64-bit libraries
