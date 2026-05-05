@@ -1,18 +1,31 @@
-# EVE-NG Native Console Setup on Ubuntu (Firefox + GNOME Terminal)
+# EVE-NG Native Console Setup on Ubuntu (Fixed Telnet Handler)
+
+![Platform](https://img.shields.io/badge/Platform-Ubuntu-E95420?logo=ubuntu\&logoColor=white)
+![EVE-NG](https://img.shields.io/badge/EVE--NG-Community-blue)
+![Browser](https://img.shields.io/badge/Browser-Firefox-FF7139?logo=firefox\&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Working-success)
+
+---
 
 ## 📌 Overview
 
-This guide explains how to configure **EVE-NG Native Console** on Ubuntu so that clicking a device opens a terminal (gnome-terminal) automatically via `telnet://`.
+This guide shows how to properly configure **EVE-NG Native Console on Ubuntu** using Firefox and GNOME Terminal.
+
+✅ Fixes:
+
+* “No apps available” error
+* `telnet>` prompt issue (wrong parsing)
+* Proper direct connection to device console
 
 ---
 
 ## 🧰 Requirements
 
 * Ubuntu (host OS)
-* EVE-NG running (e.g., inside VMware)
-* Firefox browser (recommended)
-* `gnome-terminal` (preinstalled)
-* `telnet` package
+* EVE-NG (VMware or bare-metal)
+* Firefox browser
+* gnome-terminal (default)
+* telnet
 
 ---
 
@@ -25,33 +38,61 @@ sudo apt install telnet xdg-utils
 
 ---
 
-## 🔧 Step 2: Create Telnet Handler
+## 🔧 Step 2: Create Telnet Handler Script (IMPORTANT FIX)
 
-Create a custom handler so Ubuntu knows how to open `telnet://` links.
+This solves the issue where telnet opens but **does not connect automatically**.
+
+```bash
+mkdir -p ~/.local/bin
+nano ~/.local/bin/eve-telnet-handler
+```
+
+Paste:
+
+```bash
+#!/bin/bash
+
+url="$1"
+host=$(echo "$url" | sed -E 's#telnet://([^:]+):([0-9]+).*#\1#')
+port=$(echo "$url" | sed -E 's#telnet://([^:]+):([0-9]+).*#\2#')
+
+gnome-terminal -- bash -c "telnet $host $port; exec bash"
+```
+
+Make executable:
+
+```bash
+chmod +x ~/.local/bin/eve-telnet-handler
+```
+
+---
+
+## 🔧 Step 3: Create Desktop Handler
 
 ```bash
 nano ~/.local/share/applications/telnet.desktop
 ```
 
-Paste the following:
+Paste:
 
 ```ini
 [Desktop Entry]
 Name=Telnet Handler
-Exec=gnome-terminal -- bash -c "telnet %h %p"
+Exec=/home/YOUR_USERNAME/.local/bin/eve-telnet-handler %u
 Type=Application
 NoDisplay=true
 MimeType=x-scheme-handler/telnet;
 ```
 
-Save and exit:
+⚠️ Replace:
 
-* `CTRL + O` → Enter
-* `CTRL + X`
+```
+YOUR_USERNAME
+```
 
 ---
 
-## 🔧 Step 3: Register the Handler
+## 🔧 Step 4: Register Handler
 
 ```bash
 update-desktop-database ~/.local/share/applications/
@@ -60,7 +101,7 @@ xdg-mime default telnet.desktop x-scheme-handler/telnet
 
 ---
 
-## 🔧 Step 4: Configure Firefox
+## 🔧 Step 5: Configure Firefox
 
 1. Open Firefox
 2. Go to:
@@ -73,92 +114,112 @@ xdg-mime default telnet.desktop x-scheme-handler/telnet
    ```
    network.protocol-handler.expose.telnet
    ```
-4. Set it to:
+4. Set:
 
    ```
    false
    ```
 
-Restart Firefox completely.
+Restart Firefox.
 
 ---
 
-## 🔧 Step 5: Test Native Console
+## 🔧 Step 6: Test Native Console
 
-1. Open EVE-NG in Firefox:
+### In EVE-NG:
 
-   ```
-   https://<EVE-IP>
-   ```
-2. Start a device
-3. Click:
+* Start a node
+* Click:
 
-   ```
-   Console → Native
-   ```
+  ```
+  Console → Native
+  ```
 
-✅ Expected result:
+### ✅ Expected Result:
 
-* A **gnome-terminal window opens**
-* Connects to device via telnet
+* GNOME Terminal opens
+* Automatically connects to device
+* No `telnet>` prompt
 
 ---
 
-## 🧪 Manual Test (Optional)
+## 🧪 Manual Test
 
 ```bash
 xdg-open telnet://192.168.70.70:32772
 ```
 
-If terminal opens → setup is working correctly.
+---
+
+## 📸 Screenshots
+
+### 🔹 Before Fix (Issue)
+
+![Error](screenshots/error-no-app.png)
+
+### 🔹 Wrong Behavior (telnet>)
+
+![Telnet Prompt](screenshots/telnet-prompt.png)
+
+### 🔹 After Fix (Working)
+
+![Working](screenshots/native-console-working.png)
 
 ---
 
 ## 🔍 Troubleshooting
 
-### ❌ Firefox shows “No apps available”
+### ❌ “No apps available”
 
-* Ensure `MimeType=x-scheme-handler/telnet;` is present
+* Ensure `.desktop` file starts with:
+
+  ```
+  [Desktop Entry]
+  ```
 * Run:
 
   ```bash
   update-desktop-database ~/.local/share/applications/
   ```
-* Restart Firefox
 
 ---
 
-### ❌ Nothing happens on click
+### ❌ “Desktop file didn’t specify Exec field”
 
-* Confirm telnet works manually:
+* Fix `.desktop` syntax
+* Ensure:
 
-  ```bash
-  telnet <EVE-IP> <PORT>
   ```
-* If works → issue is browser handler
+  Exec=/home/USER/.local/bin/eve-telnet-handler %u
+  ```
+
+---
+
+### ❌ Telnet opens but doesn’t connect
+
+* Use the **script method (Step 2)**
+* This is the correct fix
 
 ---
 
 ### ❌ Chrome not working
 
-* Chrome does **NOT support telnet://**
-* Use:
-
-  * Firefox (for Native console) ✅
-  * HTML5 console (in Chrome) ✅
+* Chrome ❌ (no telnet support)
+* Firefox ✅
+* HTML5 console ✅
 
 ---
 
-## 🔓 Exiting the Console
+## 🔓 Exit Console
 
-### Telnet session:
+Telnet session:
 
 ```
 Ctrl + ]
 quit
 ```
 
-### Inside device:
+Inside device:
 
 ```
 exit
@@ -174,20 +235,32 @@ Ctrl + D
 
 ## 🧠 Notes
 
-* Native console uses **telnet (unencrypted)** → safe in local lab
-* For public environments → use VPN or secure access
-* HTML5 console is a good fallback if native fails
+* Telnet is unencrypted → safe for local lab only
+* Do not expose EVE-NG directly to internet
+* Use VPN for remote access
 
 ---
 
-## ✅ Summary
+## 📂 Suggested Repo Structure
 
-| Component              | Status |
-| ---------------------- | ------ |
-| telnet installed       | ✔      |
-| handler created        | ✔      |
-| Firefox configured     | ✔      |
-| native console working | ✔      |
+```
+eve-ng-native-console/
+├── README.md
+├── scripts/
+│   └── eve-telnet-handler
+└── screenshots/
+    ├── error-no-app.png
+    ├── telnet-prompt.png
+    └── native-console-working.png
+```
+
+---
+
+## 🚀 Optional Improvements
+
+* Use **Tilix / Terminator** for tabs
+* Auto-name terminal windows per device
+* Replace telnet with `socat` or `netcat`
 
 ---
 
@@ -196,17 +269,11 @@ Ctrl + D
 Clicking **Native Console in EVE-NG** now:
 
 * Opens GNOME Terminal
-* Automatically connects to the device
-* No external tools required
+* Directly connects to device
+* Works reliably on Ubuntu
 
 ---
 
-## 🚀 Optional Improvements
+## 📜 License
 
-* Use **Tilix / Terminator** for tabbed consoles
-* Customize terminal titles per device
-* Use SSH instead of telnet where possible
-
----
-
-**End of Document**
+MIT
